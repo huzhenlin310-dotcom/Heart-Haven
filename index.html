@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f2ea" />
+    <meta
+      name="description"
+      content="心栖 / Heart Haven 是一款本地优先的正念冥想 PWA。"
+    />
+    <title>心栖 / Heart Haven</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=cave-theme" />
+  </head>
+  <body>
+    <a class="skip-link" href="#app">跳到主要内容</a>
+    <div class="app-shell">
+      <header class="topbar" aria-label="应用标题">
+        <div>
+          <p class="eyebrow">Heart Haven</p>
+          <h1>心栖</h1>
+        </div>
+        <div class="privacy-pill" title="所有记录只保存在本机">
+          <span aria-hidden="true">LOCAL</span>
+          <strong>本地保存</strong>
+        </div>
+      </header>
+
+      <main id="app" class="view-host" tabindex="-1"></main>
+
+      <nav class="side-nav" aria-label="主导航">
+        <button class="nav-item is-active" data-route="home" type="button" aria-label="冥想">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M4.2 5.8l2.1 2.1M17.7 16.1l2.1 2.1M3 12h3M18 12h3M4.2 18.2l2.1-2.1M17.7 7.9l2.1-2.1"/><circle cx="12" cy="12" r="4"/></svg>
+          </span>
+          <span>冥想</span>
+        </button>
+        <button class="nav-item" data-route="records" type="button" aria-label="记录">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7 4h10a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"/><path d="M9 9h6M9 13h6"/></svg>
+          </span>
+          <span>记录</span>
+        </button>
+        <button class="nav-item" data-route="stats" type="button" aria-label="趋势">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-8"/></svg>
+          </span>
+          <span>趋势</span>
+        </button>
+        <button class="nav-item" data-route="settings" type="button" aria-label="设置">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.8 1.8 0 0 0 .3 2l.1.1-2 2-.1-.1a1.8 1.8 0 0 0-2-.3 1.8 1.8 0 0 0-1 1.6V20h-3v-.2a1.8 1.8 0 0 0-1-1.6 1.8 1.8 0 0 0-2 .3l-.1.1-2-2 .1-.1a1.8 1.8 0 0 0 .3-2 1.8 1.8 0 0 0-1.6-1H5v-3h.2a1.8 1.8 0 0 0 1.6-1 1.8 1.8 0 0 0-.3-2l-.1-.1 2-2 .1.1a1.8 1.8 0 0 0 2 .3 1.8 1.8 0 0 0 1-1.6V4h3v.2a1.8 1.8 0 0 0 1 1.6 1.8 1.8 0 0 0 2-.3l.1-.1 2 2-.1.1a1.8 1.8 0 0 0-.3 2 1.8 1.8 0 0 0 1.6 1h.2v3h-.2a1.8 1.8 0 0 0-1.6 1Z"/></svg>
+          </span>
+          <span>设置</span>
+        </button>
+      </nav>
+    </div>
+
+    <template id="home-template">
+      <section class="home-minimal" aria-label="开始冥想">
+        <button class="meditation-start-button" data-action="start-flow" type="button" aria-label="开始冥想">
+          <span class="meditation-orbit" aria-hidden="true"></span>
+          <span class="meditation-orbit orbit-two" aria-hidden="true"></span>
+          <span class="meditation-core">
+            <span>开始</span>
+            <small>冥想</small>
+          </span>
+        </button>
+      </section>
+    </template>
+    <script src="app.js?v=audio-select" defer></script>
+  </body>
+</html>
