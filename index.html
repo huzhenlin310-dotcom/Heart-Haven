@@ -11,7 +11,7 @@
     <title>心栖 / Heart Haven</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=cave-theme" />
+    <link rel="stylesheet" href="styles.css?v=mobile-nav-refresh" />
   </head>
   <body>
     <a class="skip-link" href="#app">跳到主要内容</a>
@@ -59,6 +59,10 @@
 
     <template id="home-template">
       <section class="home-minimal" aria-label="开始冥想">
+        <div class="home-intro" aria-hidden="true">
+          <p>今晚，先安静一下</p>
+          <span>选择一段音频，开始一场温柔的冥想</span>
+        </div>
         <button class="meditation-start-button" data-action="start-flow" type="button" aria-label="开始冥想">
           <span class="meditation-orbit" aria-hidden="true"></span>
           <span class="meditation-orbit orbit-two" aria-hidden="true"></span>
@@ -69,6 +73,6 @@
         </button>
       </section>
     </template>
-    <script src="app.js?v=audio-select" defer></script>
+    <script src="app.js?v=mobile-nav-refresh" defer></script>
   </body>
 </html>

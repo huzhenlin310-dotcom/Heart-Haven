@@ -1109,6 +1109,10 @@ textarea,
   gap: 26px;
 }
 
+.home-intro {
+  display: none;
+}
+
 .meditation-start-button {
   position: relative;
   display: grid;
@@ -1297,20 +1301,31 @@ textarea,
 
   .app-shell {
     padding-left: 14px;
-    padding-right: calc(var(--nav-size) + 12px);
+    padding-right: 14px;
+    padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 18px);
   }
 
   .topbar {
-    margin-right: calc(var(--nav-size) - 16px);
+    margin-right: 0;
   }
 
   .side-nav {
-    right: 8px;
+    top: auto;
+    right: auto;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    left: 16px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: min(330px, calc(100vw - 32px));
+    max-height: none;
+    border-radius: 30px;
     padding: 8px;
+    transform: none;
+    touch-action: manipulation;
   }
 
   .side-nav .nav-item {
-    min-height: 64px;
+    min-height: 56px;
+    border-radius: 22px;
     font-size: 0.7rem;
   }
 
@@ -1320,7 +1335,7 @@ textarea,
   }
 
   .meditation-start-button {
-    width: min(62vw, 280px);
+    width: min(42vw, 180px);
   }
 }
 
@@ -1733,6 +1748,30 @@ p,
   isolation: isolate;
 }
 
+.home-intro {
+  z-index: 1;
+  display: grid;
+  gap: 8px;
+  width: min(100%, 460px);
+  color: rgba(255, 238, 213, 0.92);
+  text-align: center;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.56);
+}
+
+.home-intro p {
+  margin: 0;
+  font-size: clamp(1.35rem, 4.8vw, 2rem);
+  font-weight: 760;
+  line-height: 1.18;
+}
+
+.home-intro span {
+  color: rgba(226, 195, 211, 0.84);
+  font-size: clamp(0.9rem, 2.8vw, 1.05rem);
+  font-weight: 620;
+  line-height: 1.5;
+}
+
 .home-minimal::before {
   content: "";
   position: fixed;
@@ -1762,28 +1801,28 @@ p,
   width: clamp(132px, 23vw, 210px);
   border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 48%, #fff7bd 0 10%, #ffd263 18%, #ff7f30 42%, rgba(147, 47, 80, 0.84) 70%, rgba(28, 8, 42, 0.92) 100%);
+    radial-gradient(circle at 50% 48%, #fff4b5 0 9%, #ffd067 18%, #f47735 41%, rgba(123, 42, 78, 0.78) 70%, rgba(27, 8, 42, 0.9) 100%);
   box-shadow:
-    0 0 36px rgba(255, 147, 50, 0.52),
-    0 0 96px rgba(255, 81, 42, 0.32),
-    0 24px 80px rgba(0, 0, 0, 0.5);
+    0 0 28px rgba(255, 147, 50, 0.38),
+    0 0 68px rgba(255, 81, 42, 0.22),
+    0 22px 68px rgba(0, 0, 0, 0.48);
   color: #2a1020;
   animation: emberFloat 5.8s ease-in-out infinite;
 }
 
 .meditation-start-button::before {
   inset: -11%;
-  border-color: rgba(255, 186, 91, 0.28);
+  border-color: rgba(255, 186, 91, 0.2);
   border-radius: 50%;
 }
 
 .meditation-start-button::after {
   inset: 20%;
-  border-color: rgba(74, 20, 34, 0.34);
+  border-color: rgba(74, 20, 34, 0.26);
 }
 
 .meditation-orbit {
-  border-color: rgba(255, 176, 91, 0.2);
+  border-color: rgba(255, 176, 91, 0.14);
 }
 
 .meditation-core span {
@@ -1895,16 +1934,66 @@ p,
 }
 
 @media (max-width: 720px) {
+  .app-shell {
+    padding: 18px 14px calc(92px + env(safe-area-inset-bottom));
+  }
+
+  .topbar {
+    display: none;
+  }
+
+  .side-nav {
+    top: auto;
+    right: auto;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    left: 16px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: min(330px, calc(100vw - 32px));
+    max-height: none;
+    border-radius: 30px;
+    padding: 8px;
+    transform: none;
+    touch-action: manipulation;
+  }
+
+  .side-nav .nav-item {
+    min-width: 0;
+    min-height: 56px;
+    border-radius: 22px;
+    font-size: 0.72rem;
+    padding: 0;
+  }
+
+  .nav-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
   .home-minimal {
-    padding-top: min(48dvh, 380px);
-    padding-bottom: 34px;
+    min-height: calc(100dvh - 92px - env(safe-area-inset-bottom));
+    align-content: end;
+    gap: clamp(18px, 4dvh, 34px);
+    padding: min(20dvh, 160px) 10px clamp(96px, 17dvh, 150px);
   }
 
   .home-minimal::before {
-    background-position: center bottom;
+    background-position: 48% bottom;
+    background-size: auto 100%;
+  }
+
+  .home-minimal::after {
+    background:
+      radial-gradient(circle at 50% 78%, rgba(255, 126, 42, 0.16), transparent 20%),
+      linear-gradient(180deg, rgba(7, 1, 15, 0.28), rgba(8, 2, 17, 0.08) 36%, rgba(7, 2, 12, 0.36)),
+      linear-gradient(90deg, rgba(6, 1, 12, 0.5), transparent 30%, transparent 74%, rgba(6, 1, 12, 0.42));
+  }
+
+  .home-intro {
+    align-self: end;
+    margin-bottom: clamp(8px, 2dvh, 20px);
   }
 
   .meditation-start-button {
-    width: clamp(122px, 42vw, 180px);
+    width: clamp(124px, 36vw, 152px);
   }
 }
