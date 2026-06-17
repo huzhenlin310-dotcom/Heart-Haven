@@ -2,6 +2,7 @@ const JOURNEY_STORAGE_KEY = "heart-haven.journey-tickets.v1";
 const LEGACY_MOOD_STORAGE_KEY = "heart-haven.mood-entries.v1";
 const AUDIO_SELECTION_STORAGE_KEY = "heart-haven.selected-audio.v1";
 const DEFAULT_DURATION_SECONDS = 20 * 60;
+const MIN_RECORD_SECONDS = 3 * 60;
 const AUDIO_TRACKS = [
   {
     id: "live-happier-life",
@@ -126,8 +127,7 @@ function bindNavigation() {
     item.addEventListener("click", () => {
       const route = item.dataset.route;
       if (!route) return;
-      stopMeditationPlayback();
-      render(route);
+      requestRouteChange(route);
     });
   });
 
@@ -159,8 +159,27 @@ function switchRouteByDirection(direction) {
   const currentRoute = ROUTES.includes(state.route) ? state.route : "home";
   const currentIndex = ROUTES.indexOf(currentRoute);
   const nextIndex = (currentIndex + direction + ROUTES.length) % ROUTES.length;
-  stopMeditationPlayback();
-  render(ROUTES[nextIndex]);
+  requestRouteChange(ROUTES[nextIndex]);
+}
+
+function requestRouteChange(route) {
+  if (route === state.route) return;
+
+  if (state.route === "meditate" && hasMeditationProgress()) {
+    const elapsedSeconds = getMeditationElapsedSeconds();
+    const willRecord = canRecordMeditation(elapsedSeconds);
+    const message = willRecord
+      ? `离开冥想页会结束本次冥想，并保存 ${formatClock(elapsedSeconds)} 的记录。是否继续？`
+      : `离开冥想页会结束本次冥想。已进行 ${formatClock(elapsedSeconds)}，满 ${formatClock(MIN_RECORD_SECONDS)} 才会保存记录。是否继续？`;
+    if (!window.confirm(message)) return;
+    finishMeditation({ destinationRoute: route });
+    return;
+  }
+
+  if (state.route === "meditate") {
+    resetActiveJourney();
+  }
+  render(route);
 }
 
 function render(route) {
@@ -229,11 +248,27 @@ function renderAudioSelect() {
   `;
 
   const audioOptions = section.querySelector("[data-audio-options]");
+  let preservedAudioOptionsScrollTop = audioOptions.scrollTop;
+  audioOptions.addEventListener("scroll", () => {
+    preservedAudioOptionsScrollTop = audioOptions.scrollTop;
+  });
   audioOptions.querySelectorAll("[data-audio-id]").forEach((button) => {
+    button.addEventListener("pointerdown", () => {
+      preservedAudioOptionsScrollTop = audioOptions.scrollTop;
+    });
+    button.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        preservedAudioOptionsScrollTop = audioOptions.scrollTop;
+      }
+    });
     button.addEventListener("click", () => {
       state.selectedAudioId = button.dataset.audioId || AUDIO_TRACKS[0].id;
       writeSelectedAudioId();
-      render("audio-select");
+      updateAudioOptionSelection(audioOptions);
+      audioOptions.scrollTop = preservedAudioOptionsScrollTop;
+      window.requestAnimationFrame(() => {
+        audioOptions.scrollTop = preservedAudioOptionsScrollTop;
+      });
     });
   });
   hydrateAudioDurations(audioOptions);
@@ -263,6 +298,14 @@ function renderAudioOption(track) {
       <span class="audio-option-duration" data-duration-for="${escapeAttribute(track.id)}">${duration ? formatClock(duration) : "读取中"}</span>
     </button>
   `;
+}
+
+function updateAudioOptionSelection(container) {
+  container.querySelectorAll("[data-audio-id]").forEach((button) => {
+    const selected = button.dataset.audioId === state.selectedAudioId;
+    button.classList.toggle("is-selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
 }
 
 function hydrateAudioDurations(container) {
@@ -344,7 +387,12 @@ function renderMeditate() {
     const duration = normalizeDuration(audio.duration);
     if (!duration) return;
     state.audioDurations[selectedTrack.id] = duration;
-    resetTimer(duration);
+    if (!state.timer.isRunning && state.timer.elapsedSeconds === 0) {
+      resetTimer(duration);
+    } else {
+      state.timer.totalSeconds = duration;
+      state.timer.remainingSeconds = Math.max(0, duration - state.timer.elapsedSeconds);
+    }
     currentDuration.textContent = formatClock(duration);
     updateTimerUi(timerText, elapsedText);
     toggleButton.disabled = false;
@@ -370,11 +418,14 @@ function renderMeditate() {
   });
 
   section.querySelector("[data-action='cancel-meditation']").addEventListener("click", () => {
-    const confirmed = window.confirm("确定结束本次冥想吗？未完成不会生成记录。");
+    const elapsedSeconds = getMeditationElapsedSeconds(audio);
+    const willRecord = canRecordMeditation(elapsedSeconds);
+    const message = willRecord
+      ? `确定结束本次冥想吗？已进行 ${formatClock(elapsedSeconds)}，会保存记录。`
+      : `确定结束本次冥想吗？已进行 ${formatClock(elapsedSeconds)}，满 ${formatClock(MIN_RECORD_SECONDS)} 才会保存记录。`;
+    const confirmed = window.confirm(message);
     if (!confirmed) return;
-    stopMeditationPlayback();
-    resetActiveJourney();
-    render("home");
+    finishMeditation();
   });
 
   app.append(section);
@@ -412,12 +463,7 @@ function pauseMeditation(audio, toggleButton, status) {
 }
 
 function completeMeditation(audio) {
-  stopTimer();
-  audio.pause();
-  audio.currentTime = 0;
-  currentMeditationAudio = null;
-  state.activeJourney.isInProgress = false;
-  saveJourneyTicket();
+  finishMeditation({ audio, forceRecord: true });
 }
 
 function stopMeditationPlayback() {
@@ -430,13 +476,50 @@ function stopMeditationPlayback() {
   state.activeJourney.isInProgress = false;
 }
 
-function saveJourneyTicket() {
+function finishMeditation({ audio = currentMeditationAudio, destinationRoute = "", forceRecord = false } = {}) {
+  const elapsedSeconds = getMeditationElapsedSeconds(audio);
+  stopMeditationPlayback();
+
+  if (forceRecord || canRecordMeditation(elapsedSeconds)) {
+    saveJourneyTicket(elapsedSeconds, { renderResult: !destinationRoute });
+    if (destinationRoute) {
+      resetActiveJourney();
+      render(destinationRoute);
+    }
+    return true;
+  }
+
+  resetActiveJourney();
+  render(destinationRoute || "home");
+  return false;
+}
+
+function hasMeditationProgress() {
+  return state.activeJourney.isInProgress || state.timer.elapsedSeconds > 0;
+}
+
+function getMeditationElapsedSeconds(audio = currentMeditationAudio) {
+  let elapsedSeconds = Math.max(0, Number(state.timer.elapsedSeconds) || 0);
+  if (audio && Number.isFinite(audio.currentTime)) {
+    elapsedSeconds = Math.max(elapsedSeconds, Math.floor(audio.currentTime));
+  }
+
+  const totalSeconds = state.timer.totalSeconds || getSelectedAudioDuration();
+  if (totalSeconds) return Math.min(elapsedSeconds, totalSeconds);
+  return elapsedSeconds;
+}
+
+function canRecordMeditation(elapsedSeconds) {
+  return elapsedSeconds >= MIN_RECORD_SECONDS;
+}
+
+function saveJourneyTicket(durationSeconds, { renderResult = true } = {}) {
   const journeyNo = state.journeyTickets.length + 1;
   const selectedTrack = getSelectedAudioTrack();
   const ticket = {
     id: getSessionId(),
     journeyNo,
-    durationSeconds: state.timer.totalSeconds || getSelectedAudioDuration() || DEFAULT_DURATION_SECONDS,
+    durationSeconds: Math.max(1, Math.round(durationSeconds || state.timer.elapsedSeconds || state.timer.totalSeconds || getSelectedAudioDuration() || DEFAULT_DURATION_SECONDS)),
     sessionType: "冥想",
     audioTitle: selectedTrack.title,
     audioSrc: selectedTrack.src,
@@ -450,7 +533,7 @@ function saveJourneyTicket() {
   state.activeJourney.savedTicket = ticket;
   state.activeJourney.step = "ticket-result";
   state.activeJourney.error = "";
-  render("journey-result");
+  if (renderResult) render("journey-result");
 }
 
 function renderJourneyResult() {
