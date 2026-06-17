@@ -1,6 +1,7 @@
 const JOURNEY_STORAGE_KEY = "heart-haven.journey-tickets.v1";
 const LEGACY_MOOD_STORAGE_KEY = "heart-haven.mood-entries.v1";
 const AUDIO_SELECTION_STORAGE_KEY = "heart-haven.selected-audio.v1";
+const UPDATE_FINGERPRINT_STORAGE_KEY = "heart-haven.update-fingerprint.v1";
 const DEFAULT_DURATION_SECONDS = 20 * 60;
 const MIN_RECORD_SECONDS = 3 * 60;
 const AUDIO_TRACKS = [
@@ -98,10 +99,20 @@ const app = document.querySelector("#app");
 const navItems = [...document.querySelectorAll(".nav-item")];
 const sideNav = document.querySelector(".side-nav");
 const ROUTES = ["home", "records", "stats", "settings"];
+const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
+const APP_UPDATE_ASSETS = [
+  "index.html",
+  "styles.css",
+  "app.js",
+  "service-worker.js",
+  "manifest.webmanifest"
+];
 
 let currentMeditationAudio = null;
 let sidebarTouchStartY = 0;
 let lastSidebarSwitchAt = 0;
+let pendingUpdateWorker = null;
+let isRefreshingForUpdate = false;
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -889,8 +900,141 @@ function cssEscape(value) {
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js").catch(() => {
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!isRefreshingForUpdate) return;
+      window.location.reload();
+    });
+
+    navigator.serviceWorker.register("service-worker.js").then((registration) => {
+      if (registration.waiting && navigator.serviceWorker.controller) {
+        showUpdatePrompt(registration.waiting);
+      }
+
+      registration.addEventListener("updatefound", () => {
+        const installingWorker = registration.installing;
+        if (!installingWorker) return;
+
+        installingWorker.addEventListener("statechange", () => {
+          if (installingWorker.state === "installed" && navigator.serviceWorker.controller) {
+            showUpdatePrompt(installingWorker);
+          }
+        });
+      });
+
+      window.setInterval(() => {
+        registration.update().catch(() => {});
+        checkForCodeUpdates();
+      }, UPDATE_CHECK_INTERVAL_MS);
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState !== "visible") return;
+        registration.update().catch(() => {});
+        checkForCodeUpdates();
+      });
+
+      checkForCodeUpdates();
+    }).catch(() => {
       // The app still works without offline caching.
     });
   });
+}
+
+function showUpdatePrompt(worker) {
+  pendingUpdateWorker = worker;
+  if (document.querySelector("[data-update-prompt]")) return;
+
+  const prompt = document.createElement("aside");
+  prompt.className = "update-prompt";
+  prompt.dataset.updatePrompt = "";
+  prompt.setAttribute("role", "status");
+  prompt.setAttribute("aria-live", "polite");
+  prompt.innerHTML = `
+    <div>
+      <strong>发现新版本</strong>
+      <p>刷新后即可使用最新内容。</p>
+    </div>
+    <button class="primary-action" data-action="apply-update" type="button">刷新</button>
+  `;
+
+  prompt.querySelector("[data-action='apply-update']").addEventListener("click", () => {
+    applyPendingUpdate();
+  });
+
+  document.body.append(prompt);
+}
+
+function applyPendingUpdate() {
+  if (!pendingUpdateWorker) {
+    clearAppCaches().finally(() => {
+      window.location.reload();
+    });
+    return;
+  }
+
+  isRefreshingForUpdate = true;
+  pendingUpdateWorker.postMessage({ type: "SKIP_WAITING" });
+  window.setTimeout(() => {
+    window.location.reload();
+  }, 5000);
+}
+
+function checkForCodeUpdates() {
+  if (document.querySelector("[data-update-prompt]")) return;
+
+  getCurrentCodeFingerprint().then((fingerprint) => {
+    const savedFingerprint = readUpdateFingerprint();
+    if (!savedFingerprint) {
+      writeUpdateFingerprint(fingerprint);
+      return;
+    }
+
+    if (savedFingerprint !== fingerprint) {
+      writeUpdateFingerprint(fingerprint);
+      showUpdatePrompt(null);
+    }
+  }).catch(() => {});
+}
+
+function getCurrentCodeFingerprint() {
+  const stamp = Date.now();
+  return Promise.all(APP_UPDATE_ASSETS.map((asset) => {
+    const url = new URL(asset, window.location.href);
+    url.searchParams.set("update-check", String(stamp));
+    return fetch(url, { cache: "no-store" }).then((response) => {
+      if (!response.ok) throw new Error("Update check failed");
+      return response.text();
+    }).then((text) => `${asset}:${text.length}:${hashString(text)}`);
+  })).then((parts) => parts.join("|"));
+}
+
+function readUpdateFingerprint() {
+  try {
+    return localStorage.getItem(UPDATE_FINGERPRINT_STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function writeUpdateFingerprint(fingerprint) {
+  try {
+    localStorage.setItem(UPDATE_FINGERPRINT_STORAGE_KEY, fingerprint);
+  } catch {
+    // Update checks still work for the current session without persisted state.
+  }
+}
+
+function clearAppCaches() {
+  if (!("caches" in window)) return Promise.resolve();
+
+  return caches.keys().then((keys) => Promise.all(
+    keys.filter((key) => key.startsWith("heart-haven-")).map((key) => caches.delete(key))
+  )).then(() => undefined).catch(() => undefined);
+}
+
+function hashString(value) {
+  let hash = 5381;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = ((hash << 5) + hash) ^ value.charCodeAt(index);
+  }
+  return (hash >>> 0).toString(36);
 }

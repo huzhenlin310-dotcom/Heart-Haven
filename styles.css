@@ -275,6 +275,43 @@ p {
   display: none;
 }
 
+.update-prompt {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 80;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: min(440px, calc(100vw - 36px));
+  border: 2.5px solid var(--line);
+  border-radius: 22px 16px 24px 18px;
+  background: var(--green);
+  box-shadow: var(--shadow-hard);
+  padding: 14px;
+  transform: rotate(-0.45deg);
+}
+
+.update-prompt strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ink);
+  font-family: var(--hand-font);
+  font-size: 1.08rem;
+  font-weight: 900;
+}
+
+.update-prompt p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.update-prompt .primary-action {
+  min-width: 82px;
+}
+
 .nav-item {
   display: grid;
   place-items: center;
@@ -1175,6 +1212,13 @@ input::placeholder {
     padding: 8px;
     transform: rotate(-0.6deg);
     touch-action: manipulation;
+  }
+
+  .update-prompt {
+    right: 16px;
+    bottom: calc(104px + env(safe-area-inset-bottom));
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: calc(100vw - 32px);
   }
 
   .side-nav .nav-item {

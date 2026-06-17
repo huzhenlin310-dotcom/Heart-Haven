@@ -1,4 +1,4 @@
-const CACHE_NAME = "heart-haven-v20";
+const CACHE_NAME = "heart-haven-v21";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -22,7 +22,6 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
-  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
@@ -34,9 +33,21 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   if (event.request.headers.has("range")) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  const requestUrl = new URL(event.request.url);
+  if (requestUrl.searchParams.has("update-check")) {
     event.respondWith(fetch(event.request));
     return;
   }
