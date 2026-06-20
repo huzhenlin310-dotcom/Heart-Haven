@@ -1,21 +1,23 @@
-const CACHE_NAME = "heart-haven-v21";
+const CACHE_NAME = "heart-haven-v22";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./updates.json",
   "./manifest.webmanifest",
   "./assets/icons/icon.svg",
   "./assets/images/cave-meditation.png",
-  "./assets/audio/001Live a Happier Life.m4a",
-  "./assets/audio/002How To Love Yourself.mp3",
-  "./assets/audio/003Loving Kindness Meditation.mp3",
-  "./assets/audio/004Finding the Passcode to Your Soul Part One.mp3",
-  "./assets/audio/005Finding the Passcode to Your Soul Part Two.mp3",
-  "./assets/audio/006Acceptance and Giving Meditation.mp4",
-  "./assets/audio/007Free Yourself from Self-Shame.mp3",
-  "./assets/audio/008Find Your Compassionate Friend.mp3",
-  "./assets/audio/009A Self-Compassion Guide for Intimate Relationships.m4a"
+  "./assets/audio/self-care-mindfulness/001Live a Happier Life.m4a",
+  "./assets/audio/self-care-mindfulness/002How To Love Yourself.mp3",
+  "./assets/audio/self-care-mindfulness/003Loving Kindness Meditation.mp3",
+  "./assets/audio/self-care-mindfulness/004Finding the Passcode to Your Soul Part One.mp3",
+  "./assets/audio/self-care-mindfulness/005Finding the Passcode to Your Soul Part Two.mp3",
+  "./assets/audio/self-care-mindfulness/006Acceptance and Giving Meditation.mp4",
+  "./assets/audio/self-care-mindfulness/007Free Yourself from Self-Shame.mp3",
+  "./assets/audio/self-care-mindfulness/008Find Your Compassionate Friend.mp3",
+  "./assets/audio/self-care-mindfulness/009A Self-Compassion Guide for Intimate Relationships.m4a",
+  "./assets/audio/nature-white-noise/10分冥想练习雨水.mp3"
 ];
 
 self.addEventListener("install", (event) => {

@@ -1,65 +1,101 @@
 const JOURNEY_STORAGE_KEY = "heart-haven.journey-tickets.v1";
 const LEGACY_MOOD_STORAGE_KEY = "heart-haven.mood-entries.v1";
 const AUDIO_SELECTION_STORAGE_KEY = "heart-haven.selected-audio.v1";
+const CARE_RECORD_STORAGE_KEY = "heart-haven.care-records.v1";
 const UPDATE_FINGERPRINT_STORAGE_KEY = "heart-haven.update-fingerprint.v1";
+const UPDATE_SUMMARY_FALLBACK = "刷新后即可使用最新内容。";
 const DEFAULT_DURATION_SECONDS = 20 * 60;
 const MIN_RECORD_SECONDS = 3 * 60;
-const AUDIO_TRACKS = [
+const AUDIO_CATEGORIES = [
   {
-    id: "live-happier-life",
-    title: "更快乐地生活",
-    src: "assets/audio/001Live a Happier Life.m4a",
-    durationSeconds: 545
+    id: "self-care-mindfulness",
+    title: "自我关怀正念冥想",
+    description: "原有冥想音频，适合完整练习。",
+    isOpen: true,
+    tracks: [
+      {
+        id: "live-happier-life",
+        title: "更快乐地生活",
+        src: "assets/audio/self-care-mindfulness/001Live a Happier Life.m4a",
+        durationSeconds: 545
+      },
+      {
+        id: "love-yourself",
+        title: "如何爱自己",
+        src: "assets/audio/self-care-mindfulness/002How To Love Yourself.mp3",
+        durationSeconds: 334
+      },
+      {
+        id: "loving-kindness",
+        title: "慈心冥想",
+        src: "assets/audio/self-care-mindfulness/003Loving Kindness Meditation.mp3",
+        durationSeconds: 1399
+      },
+      {
+        id: "soul-passcode-one",
+        title: "寻找灵魂密码（上）",
+        src: "assets/audio/self-care-mindfulness/004Finding the Passcode to Your Soul Part One.mp3",
+        durationSeconds: 680
+      },
+      {
+        id: "soul-passcode-two",
+        title: "寻找灵魂密码（下）",
+        src: "assets/audio/self-care-mindfulness/005Finding the Passcode to Your Soul Part Two.mp3",
+        durationSeconds: 851
+      },
+      {
+        id: "acceptance-giving",
+        title: "接纳与给予冥想",
+        src: "assets/audio/self-care-mindfulness/006Acceptance and Giving Meditation.mp4",
+        durationSeconds: 1284
+      },
+      {
+        id: "self-shame",
+        title: "从自我羞耻中释放",
+        src: "assets/audio/self-care-mindfulness/007Free Yourself from Self-Shame.mp3",
+        durationSeconds: 1739
+      },
+      {
+        id: "compassionate-friend",
+        title: "找到你的慈悲朋友",
+        src: "assets/audio/self-care-mindfulness/008Find Your Compassionate Friend.mp3",
+        durationSeconds: 1297
+      },
+      {
+        id: "intimate-relationships",
+        title: "亲密关系中的自我慈悲指南",
+        src: "assets/audio/self-care-mindfulness/009A Self-Compassion Guide for Intimate Relationships.m4a",
+        durationSeconds: 1608
+      }
+    ]
   },
   {
-    id: "love-yourself",
-    title: "如何爱自己",
-    src: "assets/audio/002How To Love Yourself.mp3",
-    durationSeconds: 334
+    id: "nature-white-noise",
+    title: "自然白噪音",
+    description: "雨声、流水、海浪等自然环境音。",
+    isOpen: false,
+    tracks: [
+      {
+        id: "rain-ten-minutes",
+        title: "雨水白噪音",
+        src: "assets/audio/nature-white-noise/10分冥想练习雨水.mp3",
+        durationSeconds: 602
+      }
+    ]
   },
   {
-    id: "loving-kindness",
-    title: "慈心冥想",
-    src: "assets/audio/003Loving Kindness Meditation.mp3",
-    durationSeconds: 1399
-  },
-  {
-    id: "soul-passcode-one",
-    title: "寻找灵魂密码（上）",
-    src: "assets/audio/004Finding the Passcode to Your Soul Part One.mp3",
-    durationSeconds: 680
-  },
-  {
-    id: "soul-passcode-two",
-    title: "寻找灵魂密码（下）",
-    src: "assets/audio/005Finding the Passcode to Your Soul Part Two.mp3",
-    durationSeconds: 851
-  },
-  {
-    id: "acceptance-giving",
-    title: "接纳与给予冥想",
-    src: "assets/audio/006Acceptance and Giving Meditation.mp4",
-    durationSeconds: 1284
-  },
-  {
-    id: "self-shame",
-    title: "从自我羞耻中释放",
-    src: "assets/audio/007Free Yourself from Self-Shame.mp3",
-    durationSeconds: 1739
-  },
-  {
-    id: "compassionate-friend",
-    title: "找到你的慈悲朋友",
-    src: "assets/audio/008Find Your Compassionate Friend.mp3",
-    durationSeconds: 1297
-  },
-  {
-    id: "intimate-relationships",
-    title: "亲密关系中的自我慈悲指南",
-    src: "assets/audio/009A Self-Compassion Guide for Intimate Relationships.m4a",
-    durationSeconds: 1608
+    id: "soothing-music",
+    title: "舒缓音乐",
+    description: "预留给轻音乐和睡前放松音乐。",
+    isOpen: false,
+    tracks: []
   }
 ];
+const AUDIO_TRACKS = AUDIO_CATEGORIES.flatMap((category) => category.tracks.map((track) => ({
+  ...track,
+  categoryId: category.id,
+  categoryTitle: category.title
+})));
 const JOURNEY_QUOTES = [
   "你不需要马上变好，只要愿意照顾自己。",
   "今天的这一次停下，已经是一种照顾。",
@@ -83,6 +119,7 @@ const JOURNEY_QUOTES = [
 const state = {
   route: "home",
   journeyTickets: [],
+  carePeople: [],
   selectedAudioId: AUDIO_TRACKS[0].id,
   audioDurations: Object.fromEntries(AUDIO_TRACKS.map((track) => [track.id, track.durationSeconds])),
   activeJourney: createInitialJourneyState(),
@@ -91,6 +128,7 @@ const state = {
     remainingSeconds: DEFAULT_DURATION_SECONDS,
     elapsedSeconds: 0,
     intervalId: null,
+    runToken: 0,
     isRunning: false
   }
 };
@@ -98,15 +136,17 @@ const state = {
 const app = document.querySelector("#app");
 const navItems = [...document.querySelectorAll(".nav-item")];
 const sideNav = document.querySelector(".side-nav");
-const ROUTES = ["home", "records", "stats", "settings"];
+const ROUTES = ["home", "records", "stats", "care", "settings"];
 const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
 const APP_UPDATE_ASSETS = [
   "index.html",
   "styles.css",
   "app.js",
   "service-worker.js",
-  "manifest.webmanifest"
+  "manifest.webmanifest",
+  "updates.json"
 ];
+const UPDATE_SUMMARY_URL = "updates.json";
 
 let currentMeditationAudio = null;
 let sidebarTouchStartY = 0;
@@ -118,6 +158,7 @@ document.addEventListener("DOMContentLoaded", init);
 
 function init() {
   state.journeyTickets = readJourneyTickets();
+  state.carePeople = readCarePeople();
   state.selectedAudioId = readSelectedAudioId();
   bindNavigation();
   registerServiceWorker();
@@ -204,14 +245,22 @@ function render(route) {
   if (route === "journey-result") renderJourneyResult();
   if (route === "records") renderRecords();
   if (route === "stats") renderStats();
+  if (route === "care") renderCareRecords();
   if (route === "settings") renderSettings();
+  if (route === "update-history") renderUpdateHistory();
 
   app.focus({ preventScroll: true });
 }
 
 function updateNav(route) {
-  const internalRoutes = new Set(["audio-select", "meditate", "journey-result"]);
+  const internalRoutes = new Set(["audio-select", "meditate", "journey-result", "update-history"]);
   const activeRoute = internalRoutes.has(route) ? "home" : route;
+  if (route === "update-history") {
+    navItems.forEach((item) => {
+      item.classList.toggle("is-active", item.dataset.route === "settings");
+    });
+    return;
+  }
   navItems.forEach((item) => {
     item.classList.toggle("is-active", item.dataset.route === activeRoute);
   });
@@ -249,7 +298,7 @@ function renderAudioSelect() {
     <h2>选择这次要使用的冥想音频</h2>
     <div class="audio-picker" aria-label="选择冥想音频">
       <div class="audio-options" data-audio-options>
-        ${AUDIO_TRACKS.map((track) => renderAudioOption(track)).join("")}
+        ${AUDIO_CATEGORIES.map((category) => renderAudioCategory(category)).join("")}
       </div>
     </div>
     <div class="button-row journey-actions">
@@ -308,6 +357,24 @@ function renderAudioOption(track) {
       <span class="audio-option-title">${escapeHtml(track.title)}</span>
       <span class="audio-option-duration" data-duration-for="${escapeAttribute(track.id)}">${duration ? formatClock(duration) : "读取中"}</span>
     </button>
+  `;
+}
+
+function renderAudioCategory(category) {
+  const hasTracks = category.tracks.length > 0;
+  return `
+    <details class="audio-category" ${category.isOpen ? "open" : ""}>
+      <summary>
+        <span>
+          <strong>${escapeHtml(category.title)}</strong>
+          <small>${escapeHtml(category.description)}</small>
+        </span>
+        <em>${category.tracks.length} 个音频</em>
+      </summary>
+      <div class="audio-category-tracks">
+        ${hasTracks ? category.tracks.map((track) => renderAudioOption(track)).join("") : `<p class="empty-state compact">这里暂时还没有音频。</p>`}
+      </div>
+    </details>
   `;
 }
 
@@ -443,30 +510,81 @@ function renderMeditate() {
 }
 
 function startMeditation(audio, toggleButton, status, timerText, elapsedText, breathLabel, guideCopy) {
+  stopTimer();
+  const runToken = state.timer.runToken + 1;
+  state.timer.runToken = runToken;
   state.activeJourney.isInProgress = true;
   state.timer.isRunning = true;
   toggleButton.textContent = "暂停冥想";
-  status.textContent = "冥想进行中。";
+  status.textContent = "正在启动音频。";
 
-  audio.play().catch(() => {
+  audio.play().then(() => {
+    if (state.timer.runToken !== runToken || !state.timer.isRunning) {
+      audio.pause();
+      return;
+    }
+    status.textContent = "冥想进行中。";
+    syncTimerFromAudio(audio, timerText, elapsedText, breathLabel, guideCopy);
+    state.timer.intervalId = window.setInterval(() => {
+      if (state.timer.runToken !== runToken || !state.timer.isRunning) return;
+      syncTimerFromAudio(audio, timerText, elapsedText, breathLabel, guideCopy);
+
+      if (state.timer.remainingSeconds === 0) {
+        completeMeditation(audio);
+      }
+    }, 250);
+  }).catch(() => {
+    if (state.timer.runToken !== runToken || !state.timer.isRunning) return;
     status.textContent = "浏览器未能播放音频，当前为静默冥想。";
+    startSilentTimer(runToken, timerText, elapsedText, breathLabel, guideCopy);
   });
+}
 
+function startSilentTimer(runToken, timerText, elapsedText, breathLabel, guideCopy) {
+  const startedAt = performance.now();
+  const startElapsed = state.timer.elapsedSeconds;
   state.timer.intervalId = window.setInterval(() => {
-    state.timer.elapsedSeconds += 1;
-    state.timer.remainingSeconds = Math.max(0, state.timer.totalSeconds - state.timer.elapsedSeconds);
-    breathLabel.textContent = state.timer.elapsedSeconds % 8 < 4 ? "吸气" : "呼气";
-    guideCopy.textContent = getJourneyGuide(state.timer.elapsedSeconds);
-    updateTimerUi(timerText, elapsedText);
+    if (state.timer.runToken !== runToken || !state.timer.isRunning) return;
+    const elapsedSeconds = startElapsed + Math.floor((performance.now() - startedAt) / 1000);
+    updateMeditationProgress(elapsedSeconds, timerText, elapsedText, breathLabel, guideCopy);
 
     if (state.timer.remainingSeconds === 0) {
-      completeMeditation(audio);
+      completeMeditation();
     }
-  }, 1000);
+  }, 250);
+}
+
+function syncTimerFromAudio(audio, timerText, elapsedText, breathLabel, guideCopy) {
+  const duration = normalizeDuration(audio.duration);
+  if (duration) {
+    state.timer.totalSeconds = duration;
+  }
+  const elapsedSeconds = Number.isFinite(audio.currentTime)
+    ? Math.floor(audio.currentTime)
+    : state.timer.elapsedSeconds;
+  updateMeditationProgress(elapsedSeconds, timerText, elapsedText, breathLabel, guideCopy);
+}
+
+function updateMeditationProgress(elapsedSeconds, timerText, elapsedText, breathLabel, guideCopy) {
+  const safeElapsed = Math.max(0, Number(elapsedSeconds) || 0);
+  state.timer.elapsedSeconds = state.timer.totalSeconds
+    ? Math.min(safeElapsed, state.timer.totalSeconds)
+    : safeElapsed;
+  state.timer.remainingSeconds = state.timer.totalSeconds
+    ? Math.max(0, state.timer.totalSeconds - state.timer.elapsedSeconds)
+    : 0;
+  breathLabel.textContent = state.timer.elapsedSeconds % 8 < 4 ? "吸气" : "呼气";
+  guideCopy.textContent = getJourneyGuide(state.timer.elapsedSeconds);
+  updateTimerUi(timerText, elapsedText);
 }
 
 function pauseMeditation(audio, toggleButton, status) {
+  const elapsedSeconds = getMeditationElapsedSeconds(audio);
   stopTimer();
+  state.timer.elapsedSeconds = elapsedSeconds;
+  state.timer.remainingSeconds = state.timer.totalSeconds
+    ? Math.max(0, state.timer.totalSeconds - elapsedSeconds)
+    : 0;
   audio.pause();
   state.activeJourney.isInProgress = false;
   toggleButton.textContent = "继续冥想";
@@ -614,6 +732,7 @@ function renderStats() {
   const completedCount = tickets.length;
   const totalMinutes = Math.round(tickets.reduce((total, ticket) => total + getTicketDuration(ticket), 0) / 60);
   const favoriteCount = tickets.filter((ticket) => ticket.favorite).length;
+  const careCount = getCareRecordCount();
   const latestTime = tickets[0] ? formatDateTime(tickets[0].createdAt) : "暂无";
   const section = document.createElement("section");
   section.className = "stats-layout";
@@ -622,7 +741,7 @@ function renderStats() {
       ${metricCard("完成次数", `${completedCount} 次`, "")}
       ${metricCard("累计时长", `${totalMinutes} 分钟`, "")}
       ${metricCard("收藏记录", `${favoriteCount} 条`, "")}
-      ${metricCard("最近一次", latestTime, "")}
+      ${metricCard("关怀记录", `${careCount} 条`, "")}
     </div>
     <div class="chart-panel">
       <p class="section-kicker">趋势</p>
@@ -631,6 +750,7 @@ function renderStats() {
         <p>完成次数：<strong>${Math.min(tickets.length, 7)} 次</strong></p>
         <p>累计时长：<strong>${Math.round(tickets.slice(0, 7).reduce((total, ticket) => total + getTicketDuration(ticket), 0) / 60)} 分钟</strong></p>
         <p>最近一次：<strong>${latestTime}</strong></p>
+        <p>关怀记录：<strong>${careCount} 条</strong></p>
       </div>
     </div>
     <div class="record-list">
@@ -639,6 +759,81 @@ function renderStats() {
       ${tickets.length ? `<ul class="record-items">${tickets.slice(0, 5).map((ticket) => `<li>${renderJourneyTicketCard(ticket, false)}</li>`).join("")}</ul>` : `<p class="empty-state">完成一次冥想后，这里会显示趋势。</p>`}
     </div>
   `;
+  app.append(section);
+}
+
+function renderCareRecords() {
+  const people = getSortedCarePeople();
+  const section = document.createElement("section");
+  section.className = "care-layout";
+  section.innerHTML = `
+    <div class="care-panel">
+      <p class="section-kicker">关怀记录</p>
+      <h2>记录重要的人和收到的善意</h2>
+      <form class="care-form" data-care-person-form>
+        <label>
+          <span>名字</span>
+          <input name="name" maxlength="20" required autocomplete="off" />
+        </label>
+        <label>
+          <span>性别</span>
+          <select name="gender">
+            <option value="">不填写</option>
+            <option value="女">女</option>
+            <option value="男">男</option>
+            <option value="其他">其他</option>
+            <option value="不愿填写">不愿填写</option>
+          </select>
+        </label>
+        <label>
+          <span>关系</span>
+          <input name="relationship" maxlength="16" required autocomplete="off" placeholder="朋友、家人、同事" />
+        </label>
+        <label>
+          <span>生日</span>
+          <input name="birthday" type="date" />
+        </label>
+        <button class="primary-action" type="submit">添加</button>
+      </form>
+    </div>
+    <div class="care-list">
+      ${people.length ? people.map(renderCarePersonCard).join("") : `<p class="empty-state">还没有关怀对象。先添加一个重要的人。</p>`}
+    </div>
+  `;
+
+  section.querySelector("[data-care-person-form]").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const name = String(formData.get("name") || "").trim();
+    const relationship = String(formData.get("relationship") || "").trim();
+    if (!name || !relationship) return;
+
+    state.carePeople = [{
+      id: getSessionId(),
+      name: name.slice(0, 20),
+      gender: String(formData.get("gender") || "").trim(),
+      relationship: relationship.slice(0, 16),
+      birthday: String(formData.get("birthday") || "").trim(),
+      records: [],
+      createdAt: new Date().toISOString()
+    }, ...state.carePeople];
+    writeCarePeople();
+    render("care");
+  });
+
+  section.querySelectorAll("[data-care-entry-form]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const personId = form.dataset.personId || "";
+      const input = form.querySelector("input[name='content']");
+      const content = String(input.value || "").trim().slice(0, 10);
+      if (!personId || !content) return;
+      addCareRecord(personId, content);
+      render("care");
+    });
+  });
+
   app.append(section);
 }
 
@@ -655,8 +850,18 @@ function renderSettings() {
         <p class="muted">当前共保存 ${state.journeyTickets.length} 条记录，全部仅保存在本设备。</p>
       </div>
       <div class="settings-item">
+        <h3>关怀记录</h3>
+        <p class="muted">名字、关系和关怀内容只保存在本设备。</p>
+        <p class="muted">当前共保存 ${state.carePeople.length} 位重要的人，${getCareRecordCount()} 条关怀记录。</p>
+      </div>
+      <div class="settings-item">
         <h3>音频文件</h3>
-        <p class="muted">当前可选择 ${AUDIO_TRACKS.length} 个冥想音频。</p>
+        <p class="muted">当前可选择 ${AUDIO_TRACKS.length} 个音频，分为 ${AUDIO_CATEGORIES.length} 个分类。</p>
+      </div>
+      <div class="settings-item">
+        <h3>更新记录</h3>
+        <p class="muted">查看当前版本号、更新时间和最近更新内容。</p>
+        <button class="secondary-action" data-action="view-update-history" type="button">查看更新记录</button>
       </div>
       <div class="settings-item">
         <h3>清除记录</h3>
@@ -676,7 +881,99 @@ function renderSettings() {
     render("settings");
   });
 
+  section.querySelector("[data-action='view-update-history']").addEventListener("click", () => {
+    render("update-history");
+  });
+
   app.append(section);
+}
+
+function renderUpdateHistory() {
+  const section = document.createElement("section");
+  section.className = "setting-panel update-history-panel";
+  section.innerHTML = `
+    <p class="section-kicker">更新记录</p>
+    <h2>当前版本</h2>
+    <div class="update-version-card" data-update-current>
+      <p class="empty-state">正在读取更新记录。</p>
+    </div>
+    <div class="update-record-list" data-update-history></div>
+    <div class="button-row journey-actions">
+      <button class="ghost-button" data-action="back-settings" type="button">返回设置</button>
+    </div>
+  `;
+
+  section.querySelector("[data-action='back-settings']").addEventListener("click", () => {
+    render("settings");
+  });
+
+  app.append(section);
+  loadUpdateHistory(section);
+}
+
+function loadUpdateHistory(section) {
+  getUpdateHistory().then((entries) => {
+    renderUpdateHistoryEntries(section, entries);
+  }).catch(() => {
+    const currentContainer = section.querySelector("[data-update-current]");
+    const historyContainer = section.querySelector("[data-update-history]");
+    if (currentContainer) {
+      currentContainer.innerHTML = `<p class="empty-state">暂时无法读取更新记录。</p>`;
+    }
+    if (historyContainer) historyContainer.innerHTML = "";
+  });
+}
+
+function renderUpdateHistoryEntries(section, entries) {
+  const currentContainer = section.querySelector("[data-update-current]");
+  const historyContainer = section.querySelector("[data-update-history]");
+  if (!currentContainer || !historyContainer) return;
+
+  if (!entries.length) {
+    currentContainer.innerHTML = `<p class="empty-state">还没有更新记录。</p>`;
+    historyContainer.innerHTML = "";
+    return;
+  }
+
+  const latestEntry = entries[0];
+  currentContainer.innerHTML = renderUpdateVersionCard(latestEntry);
+  historyContainer.innerHTML = `
+    <h3>历史更新</h3>
+    <ul class="update-records">
+      ${entries.map((entry) => `<li>${renderUpdateRecord(entry)}</li>`).join("")}
+    </ul>
+  `;
+}
+
+function renderUpdateVersionCard(entry) {
+  return `
+    <dl class="update-meta-grid">
+      <div>
+        <dt>版本号</dt>
+        <dd>${escapeHtml(getUpdateEntryVersion(entry))}</dd>
+      </div>
+      <div>
+        <dt>更新时间</dt>
+        <dd>${escapeHtml(formatUpdateEntryTime(entry))}</dd>
+      </div>
+    </dl>
+    <div class="update-summary-block">
+      <h3>更新内容</h3>
+      <p>${escapeHtml(entry.summary)}</p>
+    </div>
+  `;
+}
+
+function renderUpdateRecord(entry) {
+  return `
+    <article class="update-record">
+      <div class="update-record-heading">
+        <strong>${escapeHtml(getUpdateEntryVersion(entry))}</strong>
+        <time>${escapeHtml(formatUpdateEntryTime(entry))}</time>
+      </div>
+      <p>${escapeHtml(entry.summary)}</p>
+    </article>
+  `;
 }
 
 function startFlow() {
@@ -702,6 +999,7 @@ function stopTimer() {
     window.clearInterval(state.timer.intervalId);
   }
   state.timer.intervalId = null;
+  state.timer.runToken += 1;
   state.timer.isRunning = false;
 }
 
@@ -748,6 +1046,24 @@ function readJourneyTickets() {
 
 function writeJourneyTickets() {
   localStorage.setItem(JOURNEY_STORAGE_KEY, JSON.stringify(state.journeyTickets));
+}
+
+function readCarePeople() {
+  try {
+    const raw = localStorage.getItem(CARE_RECORD_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((person) => ({
+      ...person,
+      records: Array.isArray(person.records) ? person.records : []
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function writeCarePeople() {
+  localStorage.setItem(CARE_RECORD_STORAGE_KEY, JSON.stringify(state.carePeople));
 }
 
 function getSortedJourneyTickets() {
@@ -819,6 +1135,90 @@ function renderJourneyTicketCard(ticket, showActions) {
   `;
 }
 
+function renderCarePersonCard(person) {
+  const records = Array.isArray(person.records) ? person.records : [];
+  const latestRecord = records[0] || null;
+  return `
+    <article class="care-card">
+      <header>
+        <div>
+          <strong>${escapeHtml(person.name)}</strong>
+          <p>${escapeHtml(person.relationship)}</p>
+        </div>
+        <span class="care-score">+${getCareScore(person)}</span>
+      </header>
+      <div class="care-meta">
+        ${person.gender ? `<span>${escapeHtml(person.gender)}</span>` : ""}
+        ${person.birthday ? `<span>生日 ${escapeHtml(formatBirthday(person.birthday))}</span>` : ""}
+        <span>${records.length} 条关怀</span>
+      </div>
+      <form class="care-entry-form" data-care-entry-form data-person-id="${escapeAttribute(person.id)}">
+        <input name="content" maxlength="10" required autocomplete="off" placeholder="10字以内" />
+        <button class="secondary-action" type="submit">+1</button>
+      </form>
+      ${latestRecord ? `
+        <div class="care-recent">
+          <span>最近</span>
+          <strong>${escapeHtml(latestRecord.content)}</strong>
+          <time datetime="${latestRecord.createdAt}">${formatDateTime(latestRecord.createdAt)}</time>
+        </div>
+      ` : `<p class="empty-state compact">还没有记录收到的关怀。</p>`}
+      ${records.length > 1 ? `
+        <ul class="care-records">
+          ${records.slice(1, 4).map((record) => `
+            <li>
+              <span>${escapeHtml(record.content)}</span>
+              <time datetime="${record.createdAt}">${formatDateTime(record.createdAt)}</time>
+            </li>
+          `).join("")}
+        </ul>
+      ` : ""}
+    </article>
+  `;
+}
+
+function addCareRecord(personId, content) {
+  state.carePeople = state.carePeople.map((person) => {
+    if (person.id !== personId) return person;
+    const records = Array.isArray(person.records) ? person.records : [];
+    return {
+      ...person,
+      records: [{
+        id: getSessionId(),
+        content,
+        score: 1,
+        createdAt: new Date().toISOString()
+      }, ...records]
+    };
+  });
+  writeCarePeople();
+}
+
+function getCareScore(person) {
+  const records = Array.isArray(person.records) ? person.records : [];
+  return records.reduce((total, record) => total + (Number(record.score) || 1), 0);
+}
+
+function getCareRecordCount() {
+  return state.carePeople.reduce((total, person) => {
+    const records = Array.isArray(person.records) ? person.records : [];
+    return total + records.length;
+  }, 0);
+}
+
+function getSortedCarePeople() {
+  return [...state.carePeople].sort((a, b) => {
+    const latestA = getLatestCareTime(a);
+    const latestB = getLatestCareTime(b);
+    return new Date(latestB) - new Date(latestA);
+  });
+}
+
+function getLatestCareTime(person) {
+  const records = Array.isArray(person.records) ? person.records : [];
+  return records[0]?.createdAt || person.createdAt || "";
+}
+
 function getSessionType(ticket) {
   return ticket.sessionType || ticket.trainType || "冥想";
 }
@@ -873,6 +1273,16 @@ function formatDateTime(value) {
   }).format(new Date(value));
 }
 
+function formatBirthday(value) {
+  if (!value) return "";
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("zh-CN", {
+    month: "long",
+    day: "numeric"
+  }).format(date);
+}
+
 function escapeAttribute(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -907,7 +1317,7 @@ function registerServiceWorker() {
 
     navigator.serviceWorker.register("service-worker.js").then((registration) => {
       if (registration.waiting && navigator.serviceWorker.controller) {
-        showUpdatePrompt(registration.waiting);
+        notifyUpdateAvailable(registration.waiting);
       }
 
       registration.addEventListener("updatefound", () => {
@@ -916,7 +1326,7 @@ function registerServiceWorker() {
 
         installingWorker.addEventListener("statechange", () => {
           if (installingWorker.state === "installed" && navigator.serviceWorker.controller) {
-            showUpdatePrompt(installingWorker);
+            notifyUpdateAvailable(installingWorker);
           }
         });
       });
@@ -939,9 +1349,20 @@ function registerServiceWorker() {
   });
 }
 
-function showUpdatePrompt(worker) {
+function notifyUpdateAvailable(worker) {
+  showUpdatePrompt(worker, null);
+  getLatestUpdateSummary().then((summary) => {
+    if (summary) updateUpdatePromptSummary(summary);
+  }).catch(() => {});
+}
+
+function showUpdatePrompt(worker, summary) {
   pendingUpdateWorker = worker;
-  if (document.querySelector("[data-update-prompt]")) return;
+  const existingPrompt = document.querySelector("[data-update-prompt]");
+  if (existingPrompt) {
+    if (summary) updateUpdatePromptSummary(summary);
+    return;
+  }
 
   const prompt = document.createElement("aside");
   prompt.className = "update-prompt";
@@ -951,7 +1372,7 @@ function showUpdatePrompt(worker) {
   prompt.innerHTML = `
     <div>
       <strong>发现新版本</strong>
-      <p>刷新后即可使用最新内容。</p>
+      <p data-update-summary>${escapeHtml(summary || UPDATE_SUMMARY_FALLBACK)}</p>
     </div>
     <button class="primary-action" data-action="apply-update" type="button">刷新</button>
   `;
@@ -961,6 +1382,12 @@ function showUpdatePrompt(worker) {
   });
 
   document.body.append(prompt);
+}
+
+function updateUpdatePromptSummary(summary) {
+  const summaryElement = document.querySelector("[data-update-summary]");
+  if (!summaryElement) return;
+  summaryElement.textContent = summary;
 }
 
 function applyPendingUpdate() {
@@ -990,9 +1417,66 @@ function checkForCodeUpdates() {
 
     if (savedFingerprint !== fingerprint) {
       writeUpdateFingerprint(fingerprint);
-      showUpdatePrompt(null);
+      notifyUpdateAvailable(null);
     }
   }).catch(() => {});
+}
+
+function getLatestUpdateSummary() {
+  return getUpdateHistory().then((entries) => {
+    const entry = entries[0];
+    if (!entry) return "";
+    return String(entry.summary || "").trim();
+  });
+}
+
+function getUpdateHistory() {
+  const stamp = Date.now();
+  const url = new URL(UPDATE_SUMMARY_URL, window.location.href);
+  url.searchParams.set("update-check", String(stamp));
+
+  return fetch(url, { cache: "no-store" })
+    .then((response) => {
+      if (!response.ok) throw new Error("Update summary failed");
+      return response.json();
+    })
+    .then((payload) => {
+      return getUpdateEntries(payload).sort((leftEntry, rightEntry) => {
+        return getUpdateEntryTime(rightEntry) - getUpdateEntryTime(leftEntry);
+      });
+    });
+}
+
+function getUpdateEntries(payload) {
+  const entries = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.updates)
+      ? payload.updates
+      : payload?.latest
+        ? [payload.latest]
+        : [payload];
+
+  return entries
+    .filter((entry) => entry && typeof entry === "object" && entry.summary)
+    .map((entry) => ({
+      ...entry,
+      summary: String(entry.summary || "").trim()
+    }));
+}
+
+function getUpdateEntryVersion(entry) {
+  return String(entry.version || "未标注版本");
+}
+
+function getUpdateEntryTime(entry) {
+  const releasedAt = Date.parse(entry.releasedAt || entry.date || "");
+  return Number.isNaN(releasedAt) ? 0 : releasedAt;
+}
+
+function formatUpdateEntryTime(entry) {
+  const timestamp = getUpdateEntryTime(entry);
+  if (!timestamp) return "未标注时间";
+  return formatDateTime(new Date(timestamp).toISOString());
 }
 
 function getCurrentCodeFingerprint() {

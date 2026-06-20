@@ -1,7 +1,9 @@
-# Meditation audio
+# Audio library
 
-Place the real meditation file at:
+Audio files are grouped by category:
 
-`assets/audio/meditation.mp3`
+- `self-care-mindfulness/`: guided self-care mindfulness meditation.
+- `nature-white-noise/`: rain, water, waves, forest, and other natural white noise.
+- `soothing-music/`: reserved for gentle music and sleep-friendly tracks.
 
-The app is designed to keep working without this file and will fall back to a silent timer.
+When adding a new file, add its metadata to `AUDIO_CATEGORIES` in `app.js` and update `service-worker.js` if the file should be available offline.
