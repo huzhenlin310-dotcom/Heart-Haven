@@ -158,22 +158,30 @@ p {
 
 .skip-link {
   position: fixed;
-  top: 14px;
-  left: 14px;
+  top: 50%;
+  left: max(10px, env(safe-area-inset-left));
   z-index: 100;
-  transform: translateY(-150%);
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  transform: translateY(-50%) rotate(-2deg);
   border: 2px solid var(--line);
-  border-radius: 12px 16px 10px 18px;
+  border-radius: 999px 22px 999px 18px;
   background: var(--yellow);
   box-shadow: var(--shadow-small);
   color: var(--ink);
-  padding: 10px 14px;
-  font-weight: 800;
+  font-size: 1.35rem;
+  font-weight: 950;
+  line-height: 1;
   text-decoration: none;
+  transition: transform 200ms cubic-bezier(.2, 1.35, .35, 1), box-shadow 180ms ease;
 }
 
+.skip-link:hover,
 .skip-link:focus {
-  transform: translateY(0) rotate(-1deg);
+  transform: translateY(-50%) rotate(1deg) scale(1.05);
+  box-shadow: 5px 6px 0 rgba(38, 51, 77, 0.86);
 }
 
 .app-shell {
@@ -713,12 +721,21 @@ p {
 .audio-picker,
 .audio-category-tracks,
 .care-layout,
+.care-detail-layout,
 .care-form,
+.care-edit-form,
 .care-list,
 .care-card,
 .care-meta,
 .care-records,
+.range-tabs,
+.stats-panel,
+.stats-summary,
 .checkin-panel,
+.checkin-summary,
+.checkin-calendar,
+.checkin-grid,
+.checkin-weekdays,
 .mood-form,
 .score-control,
 .stats-layout,
@@ -849,6 +866,10 @@ p {
   align-items: start;
 }
 
+.care-detail-layout {
+  align-items: start;
+}
+
 .care-panel {
   background: var(--green);
   transform: rotate(-0.35deg);
@@ -959,6 +980,10 @@ p {
   padding-inline: 10px;
 }
 
+.care-more-button {
+  width: fit-content;
+}
+
 .care-recent {
   border: 2px dashed var(--line-soft);
   border-radius: 16px 12px 18px 14px;
@@ -981,6 +1006,14 @@ p {
 .care-records li {
   border-top: 2px dashed var(--line-soft);
   padding-top: 8px;
+}
+
+.care-records.full-list li {
+  min-height: 52px;
+}
+
+.care-full-records {
+  background: var(--blue);
 }
 
 .empty-state.compact {
@@ -1151,6 +1184,180 @@ p {
   border-radius: inherit;
   background:
     repeating-linear-gradient(-45deg, var(--accent), var(--accent) 6px, #ffd982 6px, #ffd982 12px);
+}
+
+.stats-panel {
+  background: var(--blue);
+}
+
+.range-tabs {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.range-tab {
+  min-height: 48px;
+  border: 2px solid var(--line);
+  border-radius: 18px 13px 20px 14px;
+  background: #ffffff;
+  box-shadow: var(--shadow-small);
+  color: var(--ink-soft);
+  font-weight: 900;
+  transition: transform 220ms cubic-bezier(.2, 1.35, .35, 1), box-shadow 180ms ease, background 180ms ease;
+}
+
+.range-tab:hover {
+  transform: translateY(-3px) rotate(-0.8deg);
+  box-shadow: 5px 6px 0 rgba(38, 51, 77, 0.86);
+}
+
+.range-tab:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 2px 2px 0 rgba(38, 51, 77, 0.86);
+}
+
+.range-tab.is-active {
+  background: var(--yellow);
+  color: var(--ink);
+  outline: 3px dashed rgba(218, 139, 29, 0.55);
+  outline-offset: 3px;
+}
+
+.stats-summary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.checkin-panel {
+  background: var(--green);
+}
+
+.checkin-summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 14px;
+}
+
+.checkin-summary div {
+  min-width: 0;
+  border: 2px dashed var(--line-soft);
+  border-radius: 16px 12px 18px 14px;
+  background: rgba(255, 255, 255, 0.62);
+  padding: 12px;
+}
+
+.checkin-summary span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.checkin-summary strong {
+  color: var(--ink);
+  font-family: var(--hand-font);
+  font-size: 1.35rem;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+}
+
+.checkin-calendar {
+  gap: 10px;
+}
+
+.checkin-month {
+  color: var(--ink);
+  font-family: var(--hand-font);
+  font-size: 1.25rem;
+  font-weight: 950;
+}
+
+.checkin-weekdays,
+.checkin-grid {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.checkin-weekdays span {
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.checkin-day {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 42px;
+  place-items: center;
+  border: 2px solid var(--line-soft);
+  border-radius: 14px 10px 16px 12px;
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--ink-soft);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  isolation: isolate;
+}
+
+.checkin-day::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  top: 50%;
+  z-index: -1;
+  height: 16px;
+  transform: translateY(-50%);
+  background: transparent;
+}
+
+.checkin-day span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+}
+
+.checkin-day.is-empty {
+  border-color: transparent;
+  background: transparent;
+}
+
+.checkin-day.is-checked {
+  border-color: var(--line);
+  background: #ffffff;
+  color: var(--ink);
+}
+
+.checkin-day.is-checked::before {
+  background: var(--blue);
+}
+
+.checkin-day.is-streak-start::before {
+  left: 50%;
+  border-radius: 999px 0 0 999px;
+}
+
+.checkin-day.is-streak-end::before {
+  right: 50%;
+  border-radius: 0 999px 999px 0;
+}
+
+.checkin-day.is-streak-start.is-streak-end::before {
+  left: 50%;
+  right: 50%;
+}
+
+.checkin-day.is-checked span {
+  background: var(--blue);
+  box-shadow: inset 0 0 0 2px rgba(38, 51, 77, 0.16);
+}
+
+.checkin-day.is-today {
+  outline: 3px dashed rgba(218, 139, 29, 0.55);
+  outline-offset: 3px;
 }
 
 .field-label,
@@ -1496,6 +1703,10 @@ input::placeholder {
     grid-template-columns: 0.9fr 1.1fr;
   }
 
+  .care-detail-layout {
+    grid-template-columns: 0.82fr 1.18fr;
+  }
+
   .care-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1533,7 +1744,7 @@ input::placeholder {
     right: auto;
     bottom: calc(12px + env(safe-area-inset-bottom));
     left: 16px;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     width: min(390px, calc(100vw - 32px));
     max-height: none;
     border-radius: 28px 22px 32px 24px;

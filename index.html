@@ -11,10 +11,12 @@
     <title>心栖 / Heart Haven</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=sketch-redesign" />
+    <link rel="stylesheet" href="styles.css?v=remove-records-page" />
   </head>
   <body>
-    <a class="skip-link" href="#app">跳到主要内容</a>
+    <a class="skip-link" href="#app" aria-label="跳到主要内容">
+      <span aria-hidden="true">↑</span>
+    </a>
     <div class="app-shell">
       <header class="topbar" aria-label="应用标题">
         <div>
@@ -35,12 +37,6 @@
             <svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M4.2 5.8l2.1 2.1M17.7 16.1l2.1 2.1M3 12h3M18 12h3M4.2 18.2l2.1-2.1M17.7 7.9l2.1-2.1"/><circle cx="12" cy="12" r="4"/></svg>
           </span>
           <span>冥想</span>
-        </button>
-        <button class="nav-item" data-route="records" type="button" aria-label="记录">
-          <span class="nav-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M7 4h10a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Z"/><path d="M9 9h6M9 13h6"/></svg>
-          </span>
-          <span>记录</span>
         </button>
         <button class="nav-item" data-route="stats" type="button" aria-label="趋势">
           <span class="nav-icon" aria-hidden="true">
@@ -79,6 +75,6 @@
         </button>
       </section>
     </template>
-    <script src="app.js?v=sketch-redesign" defer></script>
+    <script src="app.js?v=remove-records-page" defer></script>
   </body>
 </html>

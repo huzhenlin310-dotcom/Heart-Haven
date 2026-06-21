@@ -1,4 +1,4 @@
-const CACHE_NAME = "heart-haven-v22";
+const CACHE_NAME = "heart-haven-v24";
 const APP_SHELL = [
   "./",
   "./index.html",

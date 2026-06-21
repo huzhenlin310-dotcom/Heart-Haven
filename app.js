@@ -120,6 +120,8 @@ const state = {
   route: "home",
   journeyTickets: [],
   carePeople: [],
+  activeCarePersonId: "",
+  activeStatsRange: "total",
   selectedAudioId: AUDIO_TRACKS[0].id,
   audioDurations: Object.fromEntries(AUDIO_TRACKS.map((track) => [track.id, track.durationSeconds])),
   activeJourney: createInitialJourneyState(),
@@ -136,7 +138,14 @@ const state = {
 const app = document.querySelector("#app");
 const navItems = [...document.querySelectorAll(".nav-item")];
 const sideNav = document.querySelector(".side-nav");
-const ROUTES = ["home", "records", "stats", "care", "settings"];
+const ROUTES = ["home", "stats", "care", "settings"];
+const STATS_RANGES = [
+  { id: "day", label: "日" },
+  { id: "week", label: "周" },
+  { id: "month", label: "月" },
+  { id: "year", label: "年" },
+  { id: "total", label: "总" }
+];
 const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
 const APP_UPDATE_ASSETS = [
   "index.html",
@@ -243,9 +252,9 @@ function render(route) {
   if (route === "audio-select") renderAudioSelect();
   if (route === "meditate") renderMeditate();
   if (route === "journey-result") renderJourneyResult();
-  if (route === "records") renderRecords();
   if (route === "stats") renderStats();
   if (route === "care") renderCareRecords();
+  if (route === "care-person") renderCarePersonDetail();
   if (route === "settings") renderSettings();
   if (route === "update-history") renderUpdateHistory();
 
@@ -253,8 +262,14 @@ function render(route) {
 }
 
 function updateNav(route) {
-  const internalRoutes = new Set(["audio-select", "meditate", "journey-result", "update-history"]);
+  const internalRoutes = new Set(["audio-select", "meditate", "journey-result", "update-history", "care-person"]);
   const activeRoute = internalRoutes.has(route) ? "home" : route;
+  if (route === "care-person") {
+    navItems.forEach((item) => {
+      item.classList.toggle("is-active", item.dataset.route === "care");
+    });
+    return;
+  }
   if (route === "update-history") {
     navItems.forEach((item) => {
       item.classList.toggle("is-active", item.dataset.route === "settings");
@@ -668,7 +683,7 @@ function saveJourneyTicket(durationSeconds, { renderResult = true } = {}) {
 function renderJourneyResult() {
   const ticket = state.activeJourney.savedTicket;
   if (!ticket) {
-    render("records");
+    render("stats");
     return;
   }
 
@@ -683,7 +698,7 @@ function renderJourneyResult() {
         ${ticket.favorite ? "取消收藏" : "收藏记录"}
       </button>
       <button class="ghost-button" data-action="ride-again" type="button">再冥想一次</button>
-      <button class="primary-action" data-action="view-records" type="button">查看记录</button>
+      <button class="primary-action" data-action="view-stats" type="button">查看统计</button>
     </div>
   `;
 
@@ -698,30 +713,9 @@ function renderJourneyResult() {
     render("meditate");
   });
 
-  section.querySelector("[data-action='view-records']").addEventListener("click", () => {
+  section.querySelector("[data-action='view-stats']").addEventListener("click", () => {
     resetActiveJourney();
-    render("records");
-  });
-
-  app.append(section);
-}
-
-function renderRecords() {
-  const tickets = getSortedJourneyTickets();
-  const section = document.createElement("section");
-  section.className = "record-list";
-  section.innerHTML = `
-    <p class="section-kicker">记录</p>
-    <h2>冥想记录</h2>
-    <p class="muted">每条记录代表一次完整的音频冥想。</p>
-    ${tickets.length ? `<ul class="record-items">${tickets.map((ticket) => `<li>${renderJourneyTicketCard(ticket, true)}</li>`).join("")}</ul>` : `<p class="empty-state">还没有记录。从冥想页开始第一次冥想。</p>`}
-  `;
-
-  section.querySelectorAll("[data-ticket-action='toggle-favorite']").forEach((button) => {
-    button.addEventListener("click", () => {
-      toggleTicketFavorite(button.dataset.ticketId || "");
-      render("records");
-    });
+    render("stats");
   });
 
   app.append(section);
@@ -729,36 +723,42 @@ function renderRecords() {
 
 function renderStats() {
   const tickets = getSortedJourneyTickets();
-  const completedCount = tickets.length;
-  const totalMinutes = Math.round(tickets.reduce((total, ticket) => total + getTicketDuration(ticket), 0) / 60);
-  const favoriteCount = tickets.filter((ticket) => ticket.favorite).length;
-  const careCount = getCareRecordCount();
-  const latestTime = tickets[0] ? formatDateTime(tickets[0].createdAt) : "暂无";
+  const activeRange = STATS_RANGES.some((range) => range.id === state.activeStatsRange)
+    ? state.activeStatsRange
+    : "total";
+  const stats = getMeditationStats(tickets, activeRange);
   const section = document.createElement("section");
   section.className = "stats-layout";
   section.innerHTML = `
-    <div class="summary-grid">
-      ${metricCard("完成次数", `${completedCount} 次`, "")}
-      ${metricCard("累计时长", `${totalMinutes} 分钟`, "")}
-      ${metricCard("收藏记录", `${favoriteCount} 条`, "")}
-      ${metricCard("关怀记录", `${careCount} 条`, "")}
-    </div>
-    <div class="chart-panel">
-      <p class="section-kicker">趋势</p>
-      <h2>最近 7 次冥想</h2>
-      <div class="support-stack">
-        <p>完成次数：<strong>${Math.min(tickets.length, 7)} 次</strong></p>
-        <p>累计时长：<strong>${Math.round(tickets.slice(0, 7).reduce((total, ticket) => total + getTicketDuration(ticket), 0) / 60)} 分钟</strong></p>
-        <p>最近一次：<strong>${latestTime}</strong></p>
-        <p>关怀记录：<strong>${careCount} 条</strong></p>
+    <div class="chart-panel stats-panel">
+      <p class="section-kicker">统计</p>
+      <h2>冥想统计</h2>
+      <div class="range-tabs" role="tablist" aria-label="统计范围">
+        ${STATS_RANGES.map((range) => `
+          <button class="range-tab ${range.id === activeRange ? "is-active" : ""}" data-stats-range="${range.id}" type="button" role="tab" aria-selected="${range.id === activeRange}">
+            ${range.label}
+          </button>
+        `).join("")}
+      </div>
+      <div class="summary-grid stats-summary">
+        ${metricCard("累计冥想时长", formatDurationMetric(stats.totalSeconds), "")}
+        ${metricCard("累计冥想天数", `${stats.dayCount} 天`, "")}
+        ${metricCard("累计次数", `${stats.count} 次`, "")}
+        ${metricCard("平均每次时长", formatDurationMetric(stats.averageSeconds), "")}
       </div>
     </div>
-    <div class="record-list">
-      <p class="section-kicker">最近记录</p>
-      <h2>最近 5 次冥想</h2>
-      ${tickets.length ? `<ul class="record-items">${tickets.slice(0, 5).map((ticket) => `<li>${renderJourneyTicketCard(ticket, false)}</li>`).join("")}</ul>` : `<p class="empty-state">完成一次冥想后，这里会显示趋势。</p>`}
+    <div class="chart-panel checkin-panel">
+      <p class="section-kicker">打卡</p>
+      <h2>日历时间轴</h2>
+      ${renderCheckinCalendar(tickets)}
     </div>
   `;
+  section.querySelectorAll("[data-stats-range]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.activeStatsRange = button.dataset.statsRange || "total";
+      render("stats");
+    });
+  });
   app.append(section);
 }
 
@@ -832,6 +832,90 @@ function renderCareRecords() {
       addCareRecord(personId, content);
       render("care");
     });
+  });
+
+  section.querySelectorAll("[data-care-person-detail]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.activeCarePersonId = button.dataset.personId || "";
+      render("care-person");
+    });
+  });
+
+  app.append(section);
+}
+
+function renderCarePersonDetail() {
+  const person = findCarePersonById(state.activeCarePersonId);
+  if (!person) {
+    state.activeCarePersonId = "";
+    render("care");
+    return;
+  }
+
+  const records = Array.isArray(person.records) ? person.records : [];
+  const section = document.createElement("section");
+  section.className = "care-detail-layout";
+  section.innerHTML = `
+    <div class="care-panel">
+      <p class="section-kicker">专属页面</p>
+      <h2>${escapeHtml(person.name)}</h2>
+      <div class="care-meta">
+        ${person.relationship ? `<span>${escapeHtml(person.relationship)}</span>` : ""}
+        ${person.gender ? `<span>${escapeHtml(person.gender)}</span>` : ""}
+        <span>${records.length} 条关怀</span>
+      </div>
+      <form class="care-form care-edit-form" data-care-birthday-form data-person-id="${escapeAttribute(person.id)}">
+        <label>
+          <span>生日</span>
+          <input name="birthday" type="date" value="${escapeAttribute(person.birthday || "")}" />
+        </label>
+        <button class="primary-action" type="submit">保存生日</button>
+      </form>
+      <form class="care-entry-form" data-care-entry-form data-person-id="${escapeAttribute(person.id)}">
+        <input name="content" maxlength="10" required autocomplete="off" placeholder="10字以内" />
+        <button class="secondary-action" type="submit">+1</button>
+      </form>
+      <button class="ghost-button" data-action="back-care" type="button">返回关怀</button>
+    </div>
+    <div class="record-list care-full-records">
+      <p class="section-kicker">所有记录</p>
+      <h2>收到的善意</h2>
+      ${records.length ? `
+        <ul class="care-records full-list">
+          ${records.map((record) => `
+            <li>
+              <span>${escapeHtml(record.content)}</span>
+              <time datetime="${record.createdAt}">${formatDateTime(record.createdAt)}</time>
+            </li>
+          `).join("")}
+        </ul>
+      ` : `<p class="empty-state">还没有记录收到的关怀。</p>`}
+    </div>
+  `;
+
+  section.querySelector("[data-action='back-care']").addEventListener("click", () => {
+    state.activeCarePersonId = "";
+    render("care");
+  });
+
+  section.querySelector("[data-care-birthday-form]").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    updateCarePerson(form.dataset.personId || "", {
+      birthday: String(formData.get("birthday") || "").trim()
+    });
+    render("care-person");
+  });
+
+  section.querySelector("[data-care-entry-form]").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const input = form.querySelector("input[name='content']");
+    const content = String(input.value || "").trim().slice(0, 10);
+    if (!content) return;
+    addCareRecord(form.dataset.personId || "", content);
+    render("care-person");
   });
 
   app.append(section);
@@ -1173,6 +1257,11 @@ function renderCarePersonCard(person) {
           `).join("")}
         </ul>
       ` : ""}
+      ${records.length > 4 ? `
+        <button class="ghost-button care-more-button" data-care-person-detail data-person-id="${escapeAttribute(person.id)}" type="button">
+          查看更多
+        </button>
+      ` : ""}
     </article>
   `;
 }
@@ -1192,6 +1281,21 @@ function addCareRecord(personId, content) {
     };
   });
   writeCarePeople();
+}
+
+function updateCarePerson(personId, patch) {
+  state.carePeople = state.carePeople.map((person) => {
+    if (person.id !== personId) return person;
+    return {
+      ...person,
+      ...patch
+    };
+  });
+  writeCarePeople();
+}
+
+function findCarePersonById(personId) {
+  return state.carePeople.find((person) => person.id === personId) || null;
 }
 
 function getCareScore(person) {
@@ -1239,6 +1343,202 @@ function metricCard(label, value, suffix) {
       ${suffix ? `<small>${escapeHtml(suffix)}</small>` : ""}
     </article>
   `;
+}
+
+function getMeditationStats(tickets, rangeId) {
+  const filteredTickets = tickets.filter((ticket) => isTicketInStatsRange(ticket, rangeId));
+  const totalSeconds = filteredTickets.reduce((total, ticket) => total + getTicketDuration(ticket), 0);
+  const dayKeys = new Set(filteredTickets.map((ticket) => getDateKey(ticket.createdAt)).filter(Boolean));
+  return {
+    count: filteredTickets.length,
+    dayCount: dayKeys.size,
+    totalSeconds,
+    averageSeconds: filteredTickets.length ? Math.round(totalSeconds / filteredTickets.length) : 0
+  };
+}
+
+function isTicketInStatsRange(ticket, rangeId) {
+  if (rangeId === "total") return true;
+  const createdAt = new Date(ticket.createdAt);
+  if (Number.isNaN(createdAt.getTime())) return false;
+  return createdAt >= getStatsRangeStart(rangeId) && createdAt <= new Date();
+}
+
+function getStatsRangeStart(rangeId) {
+  const now = new Date();
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+
+  if (rangeId === "week") {
+    const day = start.getDay();
+    const offset = day === 0 ? 6 : day - 1;
+    start.setDate(start.getDate() - offset);
+  }
+
+  if (rangeId === "month") {
+    start.setDate(1);
+  }
+
+  if (rangeId === "year") {
+    start.setMonth(0, 1);
+  }
+
+  return start;
+}
+
+function renderCheckinCalendar(tickets) {
+  const checkedKeys = getMeditationDateKeys(tickets);
+  const summary = getCheckinSummary(checkedKeys);
+  const today = new Date();
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const leadingBlanks = (monthStart.getDay() + 6) % 7;
+  const monthLabel = new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric",
+    month: "long"
+  }).format(today);
+  const weekdayLabels = ["一", "二", "三", "四", "五", "六", "日"];
+  const cells = [];
+
+  for (let index = 0; index < leadingBlanks; index += 1) {
+    cells.push(`<div class="checkin-day is-empty" aria-hidden="true"></div>`);
+  }
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const date = new Date(today.getFullYear(), today.getMonth(), day);
+    const key = getDateKey(date);
+    const isChecked = checkedKeys.has(key);
+    const previousChecked = checkedKeys.has(getDateKey(addDays(date, -1)));
+    const nextChecked = checkedKeys.has(getDateKey(addDays(date, 1)));
+    const classNames = ["checkin-day"];
+    if (isChecked) classNames.push("is-checked");
+    if (isChecked && !previousChecked) classNames.push("is-streak-start");
+    if (isChecked && previousChecked && nextChecked) classNames.push("is-streak-middle");
+    if (isChecked && !nextChecked) classNames.push("is-streak-end");
+    if (key === getDateKey(today)) classNames.push("is-today");
+    cells.push(`
+      <div class="${classNames.join(" ")}" role="gridcell" aria-label="${escapeAttribute(formatCalendarDayLabel(date, isChecked))}">
+        <span>${day}</span>
+      </div>
+    `);
+  }
+
+  return `
+    <div class="checkin-summary">
+      <div>
+        <span>当前连续</span>
+        <strong>${summary.currentStreak} 天</strong>
+      </div>
+      <div>
+        <span>最长连续</span>
+        <strong>${summary.longestStreak} 天</strong>
+      </div>
+      <div>
+        <span>本月打卡</span>
+        <strong>${summary.monthCount} 天</strong>
+      </div>
+    </div>
+    <div class="checkin-calendar" aria-label="${escapeAttribute(`${monthLabel}冥想打卡日历`)}">
+      <div class="checkin-month">${escapeHtml(monthLabel)}</div>
+      <div class="checkin-weekdays" aria-hidden="true">
+        ${weekdayLabels.map((label) => `<span>${label}</span>`).join("")}
+      </div>
+      <div class="checkin-grid" role="grid">
+        ${cells.join("")}
+      </div>
+    </div>
+  `;
+}
+
+function getMeditationDateKeys(tickets) {
+  return new Set(tickets.map((ticket) => getDateKey(ticket.createdAt)).filter(Boolean));
+}
+
+function getCheckinSummary(checkedKeys) {
+  const sortedKeys = [...checkedKeys].sort();
+  let longestStreak = 0;
+  let runningStreak = 0;
+  let previousDate = null;
+  sortedKeys.forEach((key) => {
+    const date = parseLocalDateKey(key);
+    if (!date) return;
+    runningStreak = previousDate && getDayDistance(previousDate, date) === 1
+      ? runningStreak + 1
+      : 1;
+    longestStreak = Math.max(longestStreak, runningStreak);
+    previousDate = date;
+  });
+
+  const today = new Date();
+  const todayKey = getDateKey(today);
+  const yesterdayKey = getDateKey(addDays(today, -1));
+  let cursor = checkedKeys.has(todayKey)
+    ? today
+    : checkedKeys.has(yesterdayKey)
+      ? addDays(today, -1)
+      : null;
+  let currentStreak = 0;
+  while (cursor && checkedKeys.has(getDateKey(cursor))) {
+    currentStreak += 1;
+    cursor = addDays(cursor, -1);
+  }
+
+  const monthPrefix = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-`;
+  const monthCount = sortedKeys.filter((key) => key.startsWith(monthPrefix)).length;
+
+  return {
+    currentStreak,
+    longestStreak,
+    monthCount
+  };
+}
+
+function getDateKey(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseLocalDateKey(key) {
+  const match = String(key).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
+function addDays(date, amount) {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + amount);
+  return nextDate;
+}
+
+function getDayDistance(leftDate, rightDate) {
+  const left = new Date(leftDate);
+  const right = new Date(rightDate);
+  left.setHours(0, 0, 0, 0);
+  right.setHours(0, 0, 0, 0);
+  return Math.round((right - left) / 86400000);
+}
+
+function formatDurationMetric(seconds) {
+  const safeSeconds = Math.max(0, Number(seconds) || 0);
+  if (!safeSeconds) return "0 分钟";
+  if (safeSeconds < 60) return `${Math.round(safeSeconds)} 秒`;
+  const totalMinutes = Math.round(safeSeconds / 60);
+  if (totalMinutes < 60) return `${totalMinutes} 分钟`;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return minutes ? `${hours} 小时 ${minutes} 分钟` : `${hours} 小时`;
+}
+
+function formatCalendarDayLabel(date, isChecked) {
+  const label = new Intl.DateTimeFormat("zh-CN", {
+    month: "long",
+    day: "numeric"
+  }).format(date);
+  return `${label}${isChecked ? "，已打卡" : "，未打卡"}`;
 }
 
 function getJourneyGuide(elapsedSeconds) {
