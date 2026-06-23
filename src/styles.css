@@ -1,0 +1,666 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  font-family: theme("fontFamily.body");
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: #fbf7e8;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  color: theme("colors.ink");
+  background:
+    radial-gradient(circle at 1px 1px, rgba(38, 51, 77, 0.18) 1.1px, transparent 1.3px) 0 0 / 22px 22px,
+    linear-gradient(90deg, rgba(87, 116, 153, 0.11) 1px, transparent 1px) 0 0 / 88px 88px,
+    linear-gradient(rgba(87, 116, 153, 0.09) 1px, transparent 1px) 0 0 / 88px 88px,
+    #fbf7e8;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body::before {
+  left: 20px;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: rgba(218, 76, 90, 0.24);
+  box-shadow: 6px 0 0 rgba(218, 76, 90, 0.1);
+}
+
+body::after {
+  right: 5vw;
+  top: 9vh;
+  width: min(170px, 34vw);
+  height: 120px;
+  border: 3px solid rgba(38, 51, 77, 0.18);
+  border-radius: 48% 52% 45% 55%;
+  transform: rotate(8deg);
+}
+
+@keyframes breatheSketch {
+  0%,
+  100% {
+    transform: scale(0.88);
+    opacity: 0.82;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(244, 185, 63, 0.55);
+  outline-offset: 4px;
+}
+
+svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.3;
+}
+
+h2 {
+  @apply mb-3 font-hand text-[clamp(1.8rem,4.8vw,3.5rem)] font-black leading-none text-ink;
+}
+
+h3 {
+  @apply mb-2 text-[1.08rem] font-black text-ink;
+}
+
+p {
+  @apply leading-relaxed text-ink-soft;
+}
+
+.skip-link {
+  @apply fixed left-3 top-1/2 z-[100] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full border-2 border-line bg-butter text-xl font-black text-ink shadow-sketch-sm transition;
+}
+
+.skip-link:hover,
+.skip-link:focus {
+  transform: translateY(-50%) rotate(1deg) scale(1.05);
+}
+
+.app-shell {
+  @apply mx-auto min-h-dvh w-full max-w-[1120px] px-7 pb-6 pt-6;
+  padding-right: 126px;
+}
+
+.topbar,
+.flow-panel,
+.meditation-panel,
+.setting-panel,
+.record-list,
+.care-panel,
+.care-card,
+.chart-panel,
+.metric-card,
+.record-card,
+.result-summary,
+.result-group {
+  @apply border-[2.5px] border-line bg-[#fffade]/95 shadow-sketch;
+}
+
+.topbar {
+  @apply flex min-h-[76px] items-center justify-between gap-4 rounded-[24px_18px_26px_16px] px-5 py-3;
+  transform: rotate(-0.35deg);
+}
+
+.privacy-pill {
+  @apply flex min-h-11 items-center gap-2 rounded-full border-2 border-line bg-mint px-3 py-2 text-sm font-bold text-ink-soft shadow-sketch-sm;
+  transform: rotate(1deg);
+}
+
+.privacy-pill span,
+.result-badge,
+.journey-meta-chip,
+.ticket-no,
+.care-score,
+.care-meta span {
+  @apply rounded-full border-2 border-line px-3 py-1 text-sm font-black;
+}
+
+.privacy-pill span,
+.ticket-no {
+  @apply bg-butter text-ink;
+}
+
+.view-host {
+  @apply mt-8 outline-none;
+}
+
+.side-nav {
+  @apply fixed right-5 top-1/2 z-40 flex max-h-[78vh] w-24 -translate-y-1/2 flex-col gap-3 overflow-y-auto rounded-[34px_28px_36px_24px] border-[2.5px] border-line bg-[#fff6d6]/95 p-3 shadow-sketch;
+}
+
+.nav-item {
+  @apply flex h-[76px] flex-col items-center justify-center gap-1 rounded-[24px_18px_26px_16px] border-2 border-line bg-white text-xs font-black text-ink-soft shadow-sketch-sm transition;
+}
+
+.nav-item.is-active {
+  @apply -translate-y-1 bg-accent text-ink;
+}
+
+.update-prompt {
+  @apply fixed bottom-5 right-5 z-50 flex max-w-sm items-center gap-4 rounded-[24px_18px_26px_16px] border-[2.5px] border-line bg-mint p-4 shadow-sketch;
+}
+
+.home-minimal {
+  @apply relative grid min-h-[calc(100dvh-170px)] place-items-center overflow-hidden rounded-[34px_28px_36px_24px] border-[2.5px] border-line bg-[#fff8df]/80 p-8 shadow-sketch;
+}
+
+.home-intro {
+  @apply absolute left-[8%] top-[10%] max-w-xs rotate-[-3deg] rounded-[24px_18px_26px_16px] border-2 border-line bg-blush px-5 py-4 shadow-sketch-sm;
+}
+
+.home-intro p {
+  @apply mb-1 font-hand text-2xl font-black text-ink;
+}
+
+.home-intro span {
+  @apply text-sm font-bold text-ink-soft;
+}
+
+.meditation-start-button {
+  @apply relative grid h-[min(48vw,360px)] min-h-56 w-[min(48vw,360px)] min-w-56 place-items-center rounded-full border-[3px] border-line bg-[#fff6ca] shadow-sketch transition;
+}
+
+.meditation-start-button:hover,
+.primary-action:hover,
+.secondary-action:hover,
+.ghost-button:hover,
+.danger-button:hover,
+.audio-option:hover,
+.care-card:hover {
+  @apply -translate-y-1;
+}
+
+.meditation-orbit {
+  @apply absolute inset-8 rounded-full border-2 border-dashed border-line/60;
+  animation: breatheSketch 8s ease-in-out infinite;
+}
+
+.orbit-two {
+  animation-delay: -3.5s;
+}
+
+.meditation-core {
+  @apply relative z-10 grid h-[58%] w-[58%] place-items-center rounded-full border-[3px] border-line bg-accent text-ink shadow-sketch-sm;
+}
+
+.meditation-core span {
+  @apply font-hand text-5xl font-black leading-none;
+}
+
+.meditation-core small {
+  @apply -mt-10 text-base font-black;
+}
+
+.home-journey-summary {
+  @apply absolute bottom-8 right-[8%] w-min min-w-60 rotate-2;
+}
+
+.flow-panel,
+.setting-panel {
+  @apply mx-auto max-w-3xl rounded-[30px_22px_34px_20px] p-6;
+}
+
+.meditation-panel {
+  @apply mx-auto max-w-3xl rounded-[42px_28px_44px_24px] p-7 text-center;
+}
+
+.section-kicker {
+  @apply mb-2 w-fit border-b-[3px] border-dotted border-accent font-hand text-sm font-black text-accent-strong;
+}
+
+.muted,
+.empty-state,
+.timer-display small,
+.audio-status,
+.record-card time,
+.care-recent time,
+.care-records time,
+.update-record-heading time {
+  @apply text-sm text-ink-soft;
+}
+
+.empty-state {
+  @apply rounded-2xl border-2 border-dashed border-line/30 bg-white/55 p-4;
+}
+
+.compact {
+  @apply p-3 text-sm;
+}
+
+.primary-action,
+.secondary-action,
+.ghost-button,
+.danger-button,
+.audio-option,
+.care-form input,
+.care-form select,
+.care-entry-form input {
+  @apply rounded-[18px_14px_20px_12px] border-2 border-line px-4 py-3 font-black shadow-sketch-sm transition;
+}
+
+.primary-action {
+  @apply bg-accent text-ink;
+}
+
+.secondary-action,
+.ghost-button {
+  @apply bg-sky text-ink;
+}
+
+.ghost-button {
+  @apply bg-white;
+}
+
+.danger-button {
+  @apply bg-[#ffd5d8] text-danger;
+}
+
+.button-row {
+  @apply mt-5 flex flex-wrap justify-end gap-3;
+}
+
+.audio-picker,
+.care-layout,
+.care-detail-layout,
+.stats-layout {
+  @apply grid gap-5;
+}
+
+.audio-options {
+  @apply grid max-h-[58dvh] gap-4 overflow-y-auto pr-1;
+}
+
+.audio-category {
+  @apply rounded-[24px_18px_26px_16px] border-2 border-line bg-white/65 p-3 shadow-sketch-sm;
+}
+
+.audio-category summary {
+  @apply flex cursor-pointer items-center justify-between gap-3;
+}
+
+.audio-category summary span {
+  @apply grid gap-1;
+}
+
+.audio-category summary small {
+  @apply text-sm font-bold text-ink-soft;
+}
+
+.audio-category-tracks {
+  @apply mt-3 grid gap-3;
+}
+
+.audio-option {
+  @apply flex items-center justify-between gap-3 bg-white text-left;
+}
+
+.audio-option.is-selected {
+  @apply bg-butter;
+}
+
+.audio-option-title {
+  @apply font-black text-ink;
+}
+
+.audio-option-duration {
+  @apply shrink-0 text-sm font-black text-accent-strong;
+}
+
+.timer-display {
+  @apply mx-auto my-6 grid min-h-36 max-w-sm place-items-center rounded-[30px_22px_34px_20px] border-[3px] border-line bg-butter p-6 shadow-sketch-sm;
+}
+
+.timer-display span {
+  @apply font-hand text-[clamp(3rem,13vw,6rem)] font-black leading-none text-ink;
+}
+
+.breathing-guide {
+  @apply mx-auto my-6 grid h-40 w-40 place-items-center rounded-full border-[3px] border-line bg-sky shadow-sketch-sm;
+}
+
+.breathing-core {
+  @apply h-24 w-24 rounded-full border-[3px] border-line bg-mint shadow-sketch-sm;
+  animation: breatheSketch 8s ease-in-out infinite;
+}
+
+.breathing-guide span {
+  @apply absolute font-hand text-xl font-black text-ink;
+}
+
+.journey-intro,
+.ticket-meta,
+.care-meta,
+.ticket-actions {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+.result-badge,
+.journey-meta-chip {
+  @apply bg-lavender text-ink;
+}
+
+.result-group,
+.result-summary {
+  @apply rounded-[24px_18px_26px_16px] bg-white/70 p-4;
+}
+
+.record-card,
+.care-card,
+.metric-card {
+  @apply rounded-[24px_18px_26px_16px] p-4;
+}
+
+.record-card header,
+.care-card header,
+.care-recent,
+.care-records li,
+.update-record-heading {
+  @apply flex items-center justify-between gap-3;
+}
+
+.ticket-card.is-favorite {
+  @apply bg-blush;
+}
+
+.ticket-card > strong,
+.care-card header strong {
+  @apply block text-lg font-black text-ink;
+}
+
+.ticket-quote {
+  @apply mt-3 rounded-2xl border-2 border-dashed border-line/30 bg-white/50 p-3;
+}
+
+.metric-card:nth-child(4n + 1) {
+  @apply bg-butter;
+}
+
+.metric-card:nth-child(4n + 2) {
+  @apply bg-mint;
+}
+
+.metric-card:nth-child(4n + 3) {
+  @apply bg-sky;
+}
+
+.metric-card:nth-child(4n + 4) {
+  @apply bg-blush;
+}
+
+.metric-card span {
+  @apply text-sm font-black text-ink-soft;
+}
+
+.metric-card strong {
+  @apply block text-2xl font-black text-ink;
+}
+
+.range-tabs,
+.stats-summary,
+.checkin-summary,
+.settings-list,
+.update-records,
+.care-list {
+  @apply grid gap-4;
+}
+
+.range-tabs {
+  @apply mb-5 grid grid-cols-5;
+}
+
+.range-tab {
+  @apply rounded-full border-2 border-line bg-white px-3 py-2 text-sm font-black shadow-sketch-sm transition;
+}
+
+.range-tab.is-active {
+  @apply bg-accent;
+}
+
+.checkin-summary {
+  @apply grid-cols-3;
+}
+
+.checkin-summary div {
+  @apply rounded-2xl border-2 border-line bg-white/70 p-3 text-center shadow-sketch-sm;
+}
+
+.checkin-summary span {
+  @apply block text-xs font-black text-ink-soft;
+}
+
+.checkin-summary strong {
+  @apply text-xl font-black text-ink;
+}
+
+.checkin-calendar {
+  @apply mt-5 rounded-[24px_18px_26px_16px] border-2 border-line bg-white/65 p-4 shadow-sketch-sm;
+}
+
+.checkin-month {
+  @apply mb-3 font-hand text-xl font-black text-ink;
+}
+
+.checkin-weekdays,
+.checkin-grid {
+  @apply grid grid-cols-7 gap-2;
+}
+
+.checkin-weekdays span {
+  @apply text-center text-xs font-black text-ink-soft;
+}
+
+.checkin-day {
+  @apply relative grid aspect-square place-items-center rounded-2xl border-2 border-line/20 bg-white/60 text-sm font-black text-ink;
+}
+
+.checkin-day.is-checked {
+  @apply border-line bg-mint;
+}
+
+.checkin-day.is-today {
+  @apply outline outline-2 outline-accent;
+}
+
+.care-layout,
+.care-detail-layout,
+.stats-layout {
+  @apply lg:grid-cols-[0.9fr_1.25fr];
+}
+
+.care-panel,
+.chart-panel,
+.record-list {
+  @apply rounded-[30px_22px_34px_20px] p-5;
+}
+
+.care-form {
+  @apply grid gap-3;
+}
+
+.care-form label {
+  @apply grid gap-1 text-sm font-black text-ink;
+}
+
+.care-form input,
+.care-form select,
+.care-entry-form input {
+  @apply w-full bg-white text-ink;
+}
+
+.care-entry-form {
+  @apply mt-4 flex gap-2;
+}
+
+.care-entry-form .secondary-action {
+  @apply shrink-0;
+}
+
+.care-score {
+  @apply bg-accent text-ink;
+}
+
+.care-meta span {
+  @apply bg-white text-ink-soft;
+}
+
+.care-recent {
+  @apply mt-4 rounded-2xl border-2 border-line/30 bg-white/55 p-3;
+}
+
+.care-records {
+  @apply mt-3 grid list-none gap-2 p-0;
+}
+
+.care-records li {
+  @apply rounded-2xl border-2 border-line/20 bg-white/55 p-3;
+}
+
+.settings-item,
+.update-version-card,
+.update-record {
+  @apply rounded-[24px_18px_26px_16px] border-2 border-line bg-white/65 p-4 shadow-sketch-sm;
+}
+
+.update-meta-grid {
+  @apply grid grid-cols-2 gap-3;
+}
+
+.update-meta-grid div {
+  @apply rounded-2xl border-2 border-line/20 bg-butter p-3;
+}
+
+.update-meta-grid dt {
+  @apply text-xs font-black text-ink-soft;
+}
+
+.update-meta-grid dd {
+  @apply m-0 text-lg font-black text-ink;
+}
+
+@media (min-width: 720px) {
+  .stats-summary {
+    @apply grid-cols-2;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    @apply px-4 pb-28 pt-4;
+  }
+
+  .topbar {
+    @apply hidden;
+  }
+
+  .side-nav {
+    @apply bottom-4 left-4 right-4 top-auto w-auto translate-y-0 flex-row justify-between rounded-[26px_20px_28px_18px];
+  }
+
+  .nav-item {
+    @apply h-16 flex-1;
+  }
+
+  .view-host {
+    @apply mt-0;
+  }
+
+  .home-minimal {
+    @apply min-h-[calc(100dvh-120px)] p-5;
+  }
+
+  .home-intro {
+    @apply static mb-6;
+  }
+
+  .home-journey-summary {
+    @apply static mt-6 w-full rotate-0;
+  }
+
+  .meditation-start-button {
+    @apply h-64 w-64;
+  }
+
+  .checkin-summary {
+    @apply grid-cols-1;
+  }
+
+  .update-prompt {
+    @apply bottom-24 left-4 right-4 max-w-none;
+  }
+}
+
+@media (max-width: 430px) {
+  .range-tabs {
+    @apply grid-cols-5 gap-2;
+  }
+
+  .range-tab {
+    @apply px-2;
+  }
+
+  .button-row {
+    @apply grid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}

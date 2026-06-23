@@ -1,0 +1,29 @@
+{
+  "_comment": "这是 PWA 安装清单。webmanifest 必须保持合法 JSON，所以这里使用浏览器会忽略的 _comment 字段说明配置含义。",
+  "name": "心栖 / Heart Haven",
+  "_comment_name": "name 是安装后展示的完整应用名，常用于系统应用列表或安装确认界面。",
+  "short_name": "心栖",
+  "_comment_short_name": "short_name 是空间不足时显示的短名称，例如手机主屏幕图标下方。",
+  "description": "记录冥想前后的情绪变化，帮助用户通过自我关怀练习获得平静感。",
+  "_comment_start_scope": "start_url 指定从主屏幕启动时打开的位置；scope 限定哪些 URL 属于这个 PWA。",
+  "start_url": ".",
+  "scope": ".",
+  "_comment_display_orientation": "standalone 让应用像独立 App 一样启动；portrait 将体验固定为竖屏优先。",
+  "display": "standalone",
+  "orientation": "portrait",
+  "_comment_colors": "background_color 用于启动画面背景；theme_color 用于浏览器或系统 UI 的主题色。",
+  "background_color": "#fbf7e8",
+  "theme_color": "#fbf7e8",
+  "_comment_lang": "lang 告诉浏览器和辅助技术该应用主要使用简体中文。",
+  "lang": "zh-CN",
+  "_comment_icons": "icons 声明安装图标。SVG 的 sizes:any 适配不同分辨率，maskable 允许系统裁切为圆形或圆角图标。",
+  "icons": [
+    {
+      "_comment": "同一个 SVG 同时作为普通图标和 maskable 图标使用，减少维护多个尺寸图片的成本。",
+      "src": "assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

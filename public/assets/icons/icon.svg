@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">心栖 / Heart Haven</title>
+  <desc id="desc">A calm green haven mark with a heart-shaped path.</desc>
+  <rect width="512" height="512" rx="112" fill="#f5f2ea"/>
+  <path d="M126 286c0-91 58-158 130-158s130 67 130 158c0 63-51 116-130 116s-130-53-130-116Z" fill="#d9ebe4"/>
+  <path d="M256 372c-58-39-96-78-96-126 0-36 24-64 57-64 18 0 31 8 39 21 8-13 21-21 39-21 33 0 57 28 57 64 0 48-38 87-96 126Z" fill="#28645a"/>
+  <path d="M196 262c28 17 49 24 60 24s32-7 60-24" fill="none" stroke="#f5f2ea" stroke-width="22" stroke-linecap="round"/>
+  <path d="M156 140c26-28 59-42 100-42s74 14 100 42" fill="none" stroke="#a86d3d" stroke-width="18" stroke-linecap="round"/>
+</svg>
