@@ -50,7 +50,7 @@ export function useServiceWorkerUpdates() {
 
     function handleLoad() {
       navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
-      navigator.serviceWorker.register("/service-worker.js").then((registration) => {
+      navigator.serviceWorker.register("service-worker.js").then((registration) => {
         if (registration.waiting && navigator.serviceWorker.controller) {
           showPrompt(registration.waiting);
         }

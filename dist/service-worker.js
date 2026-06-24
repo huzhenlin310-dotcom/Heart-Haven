@@ -1,4 +1,4 @@
-const CACHE_NAME = "heart-haven-v26-react";
+const CACHE_NAME = "heart-haven-v27-pages";
 const APP_SHELL = [
   "./",
   "./index.html",

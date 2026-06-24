@@ -10,7 +10,7 @@ export const UPDATE_SUMMARY_FALLBACK = "刷新后即可使用最新内容。";
 export const DEFAULT_DURATION_SECONDS = 20 * 60;
 export const MIN_RECORD_SECONDS = 3 * 60;
 export const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
-export const UPDATE_SUMMARY_URL = "/updates.json";
+export const UPDATE_SUMMARY_URL = "updates.json";
 
 export const APP_UPDATE_ASSETS = [
   "index.html",

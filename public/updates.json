@@ -1,6 +1,11 @@
 {
   "updates": [
     {
+      "version": "1.5.1",
+      "releasedAt": "2026-06-24T00:00:00+09:00",
+      "summary": "修复 GitHub Pages 部署流程，改为构建并发布 dist 目录，同时调整资源路径以适配项目子路径访问。"
+    },
+    {
       "version": "1.5.0",
       "releasedAt": "2026-06-24T00:00:00+09:00",
       "summary": "迁移至 Vite、React、TypeScript 与 Tailwind CSS，保留原有本地记录、冥想流程、关怀记录和 PWA 配置，并修复迁移后的呼吸动效。"
