@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MIN_RECORD_SECONDS } from "./constants";
 import { AUDIO_TRACKS } from "./data/audio";
 import { useServiceWorkerUpdates } from "./hooks/useServiceWorkerUpdates";
@@ -52,6 +52,52 @@ export default function App() {
   const latestTicket = sortedTickets[0] || null;
   const selectedTrack = AUDIO_TRACKS.find((track) => track.id === selectedAudioId) || AUDIO_TRACKS[0];
   const activeCarePerson = carePeople.find((person) => person.id === activeCarePersonId) || null;
+
+  useEffect(() => {
+    const main = mainRef.current;
+    const skipLink = document.querySelector<HTMLAnchorElement>(".skip-link");
+    if (!main || !skipLink) return undefined;
+
+    const mainElement = main;
+    const skipLinkElement = skipLink;
+    let revealTimer: number | undefined;
+
+    function hideSkipLink() {
+      window.clearTimeout(revealTimer);
+      skipLinkElement.classList.remove("is-visible");
+    }
+
+    function revealSkipLinkLater() {
+      window.clearTimeout(revealTimer);
+      revealTimer = window.setTimeout(() => {
+        skipLinkElement.classList.add("is-visible");
+      }, 1800);
+    }
+
+    function handleFocusIn(event: FocusEvent) {
+      if (event.target instanceof Node && mainElement.contains(event.target)) {
+        hideSkipLink();
+        return;
+      }
+
+      revealSkipLinkLater();
+    }
+
+    mainElement.addEventListener("pointerenter", hideSkipLink);
+    mainElement.addEventListener("pointerleave", revealSkipLinkLater);
+    mainElement.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("focusin", handleFocusIn);
+    skipLinkElement.addEventListener("click", hideSkipLink);
+
+    return () => {
+      window.clearTimeout(revealTimer);
+      mainElement.removeEventListener("pointerenter", hideSkipLink);
+      mainElement.removeEventListener("pointerleave", revealSkipLinkLater);
+      mainElement.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusin", handleFocusIn);
+      skipLinkElement.removeEventListener("click", hideSkipLink);
+    };
+  }, []);
 
   const navigate = useCallback((nextRoute: Route) => {
     if (nextRoute === route) return;

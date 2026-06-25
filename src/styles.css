@@ -119,10 +119,16 @@ p {
 }
 
 .skip-link {
-  @apply fixed left-3 top-1/2 z-[100] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full border-2 border-line bg-butter text-xl font-black text-ink shadow-sketch-sm transition;
+  @apply pointer-events-none fixed left-3 top-1/2 z-[100] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full border-2 border-line bg-butter text-xl font-black text-ink opacity-0 shadow-sketch-sm transition;
 }
 
+.skip-link.is-visible,
 .skip-link:hover,
+.skip-link:focus {
+  @apply pointer-events-auto opacity-100;
+}
+
+.skip-link.is-visible:hover,
 .skip-link:focus {
   transform: translateY(-50%) rotate(1deg) scale(1.05);
 }
@@ -570,6 +576,10 @@ p {
 .update-version-card,
 .update-record {
   @apply rounded-[24px_18px_26px_16px] border-2 border-line bg-white/65 p-4 shadow-sketch-sm;
+}
+
+.settings-item a {
+  @apply font-black text-accent-strong underline decoration-2 underline-offset-4;
 }
 
 .update-meta-grid {

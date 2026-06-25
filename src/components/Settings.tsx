@@ -29,6 +29,13 @@ export function Settings({ tickets, people, onClearTickets, onUpdateHistory }: S
         <div className="settings-item">
           <h3>音频文件</h3>
           <p className="muted">当前可选择 {AUDIO_TRACKS.length} 个音频，分为 {AUDIO_CATEGORIES.length} 个分类。</p>
+          <p className="muted">
+            “自我关怀正念冥想”分类中的音频来自{" "}
+            <a href="https://www.youtube.com/@onefulnessacademy?sub_confirmation=1" target="_blank" rel="noreferrer">
+              Onefulness Academy
+            </a>
+            。本 APP 不以盈利为目的，仅用于个人正念练习与记录；如相关内容构成侵权，请联系后将立即删除。
+          </p>
         </div>
         <div className="settings-item">
           <h3>更新记录</h3>
