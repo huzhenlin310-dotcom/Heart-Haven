@@ -40,6 +40,7 @@ export default function App() {
   const [savedTicket, setSavedTicket] = useState<JourneyTicket | null>(null);
   const [activeCarePersonId, setActiveCarePersonId] = useState("");
   const [activeStatsRange, setActiveStatsRange] = useState<StatsRange>("total");
+  const [autoStartMeditation, setAutoStartMeditation] = useState(false);
   const [meditationProgress, setMeditationProgress] = useState<MeditationProgress>({
     elapsedSeconds: 0,
     isRunning: false
@@ -131,10 +132,18 @@ export default function App() {
     writeSelectedAudioId(audioId);
   }
 
+  function beginMeditation(options: { autoStart?: boolean } = {}) {
+    setSavedTicket(null);
+    setMeditationProgress({ elapsedSeconds: 0, isRunning: false });
+    setAutoStartMeditation(Boolean(options.autoStart));
+    setRoute("meditate");
+  }
+
   function handleSavedTicket(ticket: JourneyTicket) {
     const nextTickets = [ticket, ...journeyTickets];
     updateTickets(nextTickets);
     setSavedTicket(ticket);
+    setAutoStartMeditation(false);
     setMeditationProgress({ elapsedSeconds: 0, isRunning: false });
     setRoute("journey-result");
   }
@@ -187,11 +196,7 @@ export default function App() {
           selectedAudioId={selectedAudioId}
           audioDurations={audioDurations}
           onSelectAudio={handleSelectAudio}
-          onBegin={() => {
-            setSavedTicket(null);
-            setMeditationProgress({ elapsedSeconds: 0, isRunning: false });
-            setRoute("meditate");
-          }}
+          onBegin={() => beginMeditation()}
           onBack={() => navigate("home")}
         />
       );
@@ -209,10 +214,12 @@ export default function App() {
           }}
           onSaved={handleSavedTicket}
           onCanceled={() => {
+            setAutoStartMeditation(false);
             setMeditationProgress({ elapsedSeconds: 0, isRunning: false });
             setRoute("home");
           }}
           onProgressChange={setMeditationProgress}
+          autoStart={autoStartMeditation}
         />
       );
     }
@@ -225,8 +232,7 @@ export default function App() {
           ticket={ticket}
           onToggleFavorite={toggleTicketFavorite}
           onAgain={() => {
-            setSavedTicket(null);
-            setRoute("meditate");
+            beginMeditation();
           }}
           onStats={() => {
             setSavedTicket(null);
@@ -297,7 +303,17 @@ export default function App() {
       return <UpdateHistory onBack={() => setRoute("settings")} />;
     }
 
-    return <Home latestTicket={latestTicket} onStart={() => setRoute("audio-select")} />;
+    return (
+      <Home
+        latestTicket={latestTicket}
+        quickAudioTitle={selectedTrack.title}
+        onStart={() => {
+          setAutoStartMeditation(false);
+          setRoute("audio-select");
+        }}
+        onQuickStart={() => beginMeditation({ autoStart: true })}
+      />
+    );
   }
 
   return (

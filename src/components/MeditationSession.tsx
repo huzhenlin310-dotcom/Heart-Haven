@@ -19,6 +19,7 @@ type MeditationSessionProps = {
   selectedTrack: AudioTrack;
   knownDuration: number;
   ticketCount: number;
+  autoStart?: boolean;
   onDurationLoaded: (trackId: string, duration: number) => void;
   onSaved: (ticket: JourneyTicket) => void;
   onCanceled: () => void;
@@ -26,10 +27,11 @@ type MeditationSessionProps = {
 };
 
 export const MeditationSession = forwardRef<MeditationSessionHandle, MeditationSessionProps>(
-  ({ selectedTrack, knownDuration, ticketCount, onDurationLoaded, onSaved, onCanceled, onProgressChange }, ref) => {
+  ({ selectedTrack, knownDuration, ticketCount, autoStart = false, onDurationLoaded, onSaved, onCanceled, onProgressChange }, ref) => {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const intervalRef = useRef<number | null>(null);
     const runTokenRef = useRef(0);
+    const autoStartedRef = useRef(false);
     const [totalSeconds, setTotalSeconds] = useState(knownDuration || DEFAULT_DURATION_SECONDS);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [remainingSeconds, setRemainingSeconds] = useState(knownDuration || DEFAULT_DURATION_SECONDS);
@@ -45,8 +47,23 @@ export const MeditationSession = forwardRef<MeditationSessionHandle, MeditationS
     }, []);
 
     useEffect(() => {
+      autoStartedRef.current = false;
+    }, [selectedTrack.id]);
+
+    useEffect(() => {
       onProgressChange({ elapsedSeconds, isRunning });
     }, [elapsedSeconds, isRunning, onProgressChange]);
+
+    useEffect(() => {
+      if (!autoStart || autoStartedRef.current || isRunning || elapsedSeconds > 0) return undefined;
+
+      autoStartedRef.current = true;
+      const startTimer = window.setTimeout(() => {
+        startMeditation();
+      }, 60);
+
+      return () => window.clearTimeout(startTimer);
+    }, [autoStart, elapsedSeconds, isRunning, selectedTrack.id]);
 
     useImperativeHandle(ref, () => ({
       finish: ({ forceRecord = false } = {}) => finishMeditation(forceRecord),

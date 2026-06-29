@@ -248,6 +248,34 @@ p {
   @apply -mt-10 text-base font-black;
 }
 
+.home-quick-start {
+  @apply absolute bottom-8 left-1/2 flex min-h-14 min-w-60 -translate-x-1/2 items-center gap-3 rounded-full border-[2.5px] border-line bg-mint px-4 py-2 text-left text-ink shadow-sketch-sm transition;
+}
+
+.home-quick-start:hover {
+  transform: translate(-50%, -4px) rotate(-1deg);
+}
+
+.home-quick-icon {
+  @apply grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 border-line bg-accent text-ink;
+}
+
+.home-quick-icon svg {
+  @apply h-5 w-5;
+}
+
+.home-quick-copy {
+  @apply grid min-w-0 gap-0.5;
+}
+
+.home-quick-copy strong {
+  @apply text-sm font-black leading-tight;
+}
+
+.home-quick-copy small {
+  @apply max-w-52 truncate text-xs font-bold leading-tight text-ink-soft;
+}
+
 .home-journey-summary {
   @apply absolute bottom-8 right-[8%] w-min min-w-60 rotate-2;
 }
@@ -639,6 +667,18 @@ p {
 
   .meditation-start-button {
     @apply h-64 w-64;
+  }
+
+  .home-quick-start {
+    @apply static mt-5 w-full min-w-0 translate-x-0 justify-center;
+  }
+
+  .home-quick-start:hover {
+    transform: translateY(-4px);
+  }
+
+  .home-quick-copy small {
+    @apply max-w-[12rem];
   }
 
   .checkin-summary {

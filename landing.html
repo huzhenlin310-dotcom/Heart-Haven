@@ -1,0 +1,1132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>自我关怀不是脆弱 | Heart Haven（心栖）</title>
+  <meta name="description" content="一篇关于自我关怀、正念练习、情绪记录与关系善意记录的专业内容文章，并介绍 Heart Haven（心栖）这款轻量级自我关怀正念 Web App。">
+  <meta name="theme-color" content="#fbf7e8">
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #fbf7e8;
+      --paper-deep: #f0e7cf;
+      --ink: #26334d;
+      --ink-soft: #526178;
+      --line: #27354f;
+      --accent: #f4b93f;
+      --accent-strong: #da8b1d;
+      --butter: #fff1a8;
+      --blush: #ffd6df;
+      --sky: #cfefff;
+      --mint: #d9f6d5;
+      --lavender: #e6dcff;
+      --white: #fffade;
+      --shadow: 6px 7px 0 rgba(38, 51, 77, 0.88);
+      --shadow-sm: 3px 4px 0 rgba(38, 51, 77, 0.8);
+      --radius: 24px 18px 26px 16px;
+      --radius-lg: 34px 28px 36px 24px;
+      font-family: "Comic Sans MS", "Segoe UI", "Microsoft YaHei UI", system-ui, sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      background: var(--paper);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 1px 1px, rgba(38, 51, 77, 0.18) 1.1px, transparent 1.3px) 0 0 / 22px 22px,
+        linear-gradient(90deg, rgba(87, 116, 153, 0.11) 1px, transparent 1px) 0 0 / 88px 88px,
+        linear-gradient(rgba(87, 116, 153, 0.09) 1px, transparent 1px) 0 0 / 88px 88px,
+        var(--paper);
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    body::before {
+      left: 20px;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: rgba(218, 76, 90, 0.24);
+      box-shadow: 6px 0 0 rgba(218, 76, 90, 0.1);
+    }
+
+    body::after {
+      right: 5vw;
+      top: 9vh;
+      width: min(170px, 34vw);
+      height: 120px;
+      border: 3px solid rgba(38, 51, 77, 0.18);
+      border-radius: 48% 52% 45% 55%;
+      transform: rotate(8deg);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    a:focus-visible,
+    summary:focus-visible {
+      outline: 3px solid rgba(244, 185, 63, 0.55);
+      outline-offset: 4px;
+    }
+
+    .page-shell {
+      width: min(1120px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    .article-shell {
+      width: min(900px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 14px;
+      z-index: 30;
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 16px;
+      padding: 12px 18px;
+      border: 2.5px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 250, 222, 0.95);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      transform: rotate(-0.35deg);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      font-weight: 1000;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 46px;
+      height: 46px;
+      place-items: center;
+      border: 2px solid var(--line);
+      border-radius: 16px 12px 18px 10px;
+      background: var(--mint);
+      box-shadow: var(--shadow-sm);
+      flex: 0 0 auto;
+    }
+
+    .brand-mark span {
+      font-family: "Segoe Print", "Comic Sans MS", "Kaiti SC", cursive;
+      font-size: 1.35rem;
+      line-height: 1;
+    }
+
+    .brand small {
+      display: block;
+      margin-top: 3px;
+      color: var(--ink-soft);
+      font-size: 0.82rem;
+      font-weight: 900;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+      font-weight: 1000;
+    }
+
+    .nav-links a {
+      border-radius: 999px;
+      padding: 10px 12px;
+    }
+
+    .nav-links a:hover {
+      background: var(--sky);
+      color: var(--ink);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 940px;
+      margin-bottom: 22px;
+      font-family: "Segoe Print", "Comic Sans MS", "Kaiti SC", cursive;
+      font-size: clamp(2.52rem, 6vw, 5.55rem);
+      font-weight: 1000;
+      letter-spacing: 0;
+      line-height: 1.06;
+    }
+
+    h2 {
+      margin-bottom: 18px;
+      font-family: "Segoe Print", "Comic Sans MS", "Kaiti SC", cursive;
+      font-size: clamp(1.76rem, 3.8vw, 3.35rem);
+      font-weight: 1000;
+      letter-spacing: 0;
+      line-height: 1.12;
+    }
+
+    h3 {
+      margin-bottom: 10px;
+      font-size: 1.16rem;
+      font-weight: 1000;
+      line-height: 1.38;
+    }
+
+    p {
+      color: var(--ink-soft);
+      line-height: 1.84;
+    }
+
+    section {
+      padding: clamp(54px, 7vw, 86px) 0;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.62fr);
+      align-items: center;
+      gap: clamp(28px, 5vw, 58px);
+      min-height: calc(100dvh - 112px);
+      padding-top: clamp(36px, 6vw, 66px);
+    }
+
+    .hero-copy {
+      max-width: 780px;
+      font-size: clamp(1.04rem, 1.8vw, 1.2rem);
+    }
+
+    .article-meta {
+      display: inline-flex;
+      width: fit-content;
+      margin-bottom: 18px;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      background: var(--mint);
+      box-shadow: var(--shadow-sm);
+      padding: 8px 12px;
+      color: var(--ink);
+      font-size: 0.92rem;
+      font-weight: 1000;
+    }
+
+    .button-row,
+    .card-actions,
+    .section-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .section-actions.centered {
+      justify-content: center;
+      text-align: center;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 50px;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--line);
+      border-radius: 18px 14px 20px 12px;
+      box-shadow: var(--shadow-sm);
+      padding: 13px 17px;
+      font-weight: 1000;
+      line-height: 1;
+      white-space: nowrap;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .button:hover {
+      transform: translateY(-3px);
+    }
+
+    .button:active {
+      transform: translateY(1px);
+      box-shadow: 1px 2px 0 rgba(38, 51, 77, 0.82);
+    }
+
+    .button.primary {
+      background: var(--accent);
+      color: var(--ink);
+    }
+
+    .button.secondary {
+      background: var(--sky);
+      color: var(--ink);
+    }
+
+    .button.ghost {
+      background: var(--white);
+      color: var(--ink);
+    }
+
+    .button.small {
+      min-height: 42px;
+      padding: 10px 13px;
+      font-size: 0.92rem;
+    }
+
+    .support-line {
+      margin-top: 20px;
+      color: var(--ink-soft);
+      font-weight: 900;
+    }
+
+    .hero-card,
+    .article-card,
+    .quote-card,
+    .scenario-card,
+    .feature-card,
+    .persona-card,
+    .info-card,
+    .faq-card {
+      border: 2.5px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 250, 222, 0.96);
+      box-shadow: var(--shadow);
+      padding: clamp(20px, 3vw, 30px);
+    }
+
+    .hero-card {
+      transform: rotate(1deg);
+    }
+
+    .note-list {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .note-list li {
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      padding: 14px;
+      color: var(--ink-soft);
+      font-weight: 900;
+      line-height: 1.66;
+    }
+
+    .note-list li:nth-child(2) {
+      background: var(--sky);
+      transform: translateX(12px);
+    }
+
+    .note-list li:nth-child(3) {
+      background: var(--mint);
+      transform: translateX(24px);
+    }
+
+    .article-card {
+      box-shadow: var(--shadow-sm);
+    }
+
+    .article-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    .quote-stack {
+      display: grid;
+      gap: 10px;
+      margin: 22px 0;
+    }
+
+    .quote-card {
+      border-width: 2px;
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      padding: 14px 16px;
+      color: var(--ink);
+      font-weight: 1000;
+    }
+
+    .section-head {
+      max-width: 820px;
+      margin-bottom: 30px;
+    }
+
+    .section-head.centered {
+      margin-inline: auto;
+      text-align: center;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .scenario-card,
+    .feature-card,
+    .persona-card,
+    .info-card {
+      display: flex;
+      min-height: 100%;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .scenario-card:nth-child(2n),
+    .feature-card:nth-child(3n + 2),
+    .persona-card:nth-child(3n + 2),
+    .info-card:nth-child(2) {
+      background: var(--mint);
+    }
+
+    .scenario-card:nth-child(3n),
+    .feature-card:nth-child(3n + 3),
+    .persona-card:nth-child(3n + 3),
+    .info-card:nth-child(3) {
+      background: var(--sky);
+    }
+
+    .scenario-card:nth-child(4n),
+    .feature-card:nth-child(4n + 1),
+    .persona-card:nth-child(4n + 1),
+    .info-card:nth-child(4) {
+      background: var(--blush);
+    }
+
+    .scenario-card b,
+    .persona-card b,
+    .feature-card b {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      color: var(--ink);
+    }
+
+    .scenario-card p,
+    .persona-card p,
+    .feature-card p {
+      margin-bottom: 0;
+    }
+
+    .card-actions {
+      margin-top: auto;
+      padding-top: 16px;
+    }
+
+    .concept-grid {
+      display: grid;
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .concept-card {
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      padding: 18px;
+    }
+
+    .concept-card:nth-child(2) {
+      background: var(--sky);
+    }
+
+    .concept-card:nth-child(3) {
+      background: var(--mint);
+    }
+
+    .mechanism-list,
+    .steps-list,
+    .info-list {
+      display: grid;
+      gap: 10px;
+      margin: 12px 0 0;
+      padding-left: 20px;
+      color: var(--ink-soft);
+      line-height: 1.72;
+    }
+
+    .app-bridge {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.64fr);
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .mini-flow {
+      display: grid;
+      gap: 12px;
+    }
+
+    .mini-flow span {
+      display: block;
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--butter);
+      box-shadow: var(--shadow-sm);
+      padding: 14px;
+      font-weight: 1000;
+    }
+
+    .mini-flow span:nth-child(2) {
+      background: var(--mint);
+      transform: translateX(12px);
+    }
+
+    .mini-flow span:nth-child(3) {
+      background: var(--sky);
+      transform: translateX(24px);
+    }
+
+    .care-panel,
+    .final-panel,
+    .medical-panel {
+      border: 2.5px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: clamp(24px, 5vw, 42px);
+    }
+
+    .care-panel {
+      background: var(--mint);
+    }
+
+    .final-panel {
+      background: var(--butter);
+    }
+
+    .medical-panel {
+      background: var(--lavender);
+    }
+
+    .care-list {
+      display: grid;
+      gap: 10px;
+      margin: 18px 0 0;
+      padding-left: 20px;
+      color: var(--ink-soft);
+      line-height: 1.72;
+    }
+
+    .usage-steps {
+      counter-reset: usage;
+      display: grid;
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .usage-step {
+      counter-increment: usage;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+    }
+
+    .usage-step::before {
+      content: counter(usage);
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      background: var(--accent);
+      font-weight: 1000;
+    }
+
+    .faq-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .faq-card {
+      padding: 0;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .faq-card summary {
+      display: flex;
+      cursor: pointer;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px;
+      font-weight: 1000;
+      list-style: none;
+    }
+
+    .faq-card summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .faq-card summary::after {
+      content: "+";
+      display: grid;
+      width: 30px;
+      height: 30px;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 2px solid var(--line);
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 2px 3px 0 rgba(38, 51, 77, 0.72);
+      font-weight: 1000;
+    }
+
+    .faq-card[open] summary::after {
+      content: "×";
+    }
+
+    .faq-card p {
+      margin: 0;
+      padding: 0 18px 18px;
+    }
+
+    .site-footer {
+      padding: 28px 0 48px;
+      color: var(--ink-soft);
+      font-weight: 900;
+    }
+
+    .footer-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-top: 2px solid rgba(39, 53, 79, 0.26);
+      padding-top: 20px;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 480ms ease, transform 480ms ease;
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 940px) {
+      .nav-links {
+        display: none;
+      }
+
+      .hero,
+      .app-bridge {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page-shell,
+      .article-shell {
+        width: min(100% - 28px, 1120px);
+      }
+
+      .topbar {
+        top: 8px;
+        min-height: 66px;
+        transform: rotate(0);
+      }
+
+      .grid.two,
+      .grid.three {
+        grid-template-columns: 1fr;
+      }
+
+      .button-row,
+      .section-actions,
+      .card-actions {
+        display: grid;
+      }
+
+      .button {
+        width: 100%;
+      }
+
+      .note-list li:nth-child(2),
+      .note-list li:nth-child(3),
+      .mini-flow span:nth-child(2),
+      .mini-flow span:nth-child(3) {
+        transform: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar page-shell" aria-label="Heart Haven（心栖）内容页导航">
+    <a class="brand" href="#top" aria-label="Heart Haven（心栖）">
+      <span class="brand-mark" aria-hidden="true"><span>心</span></span>
+      <span>
+        <strong>Heart Haven（心栖）</strong>
+        <small>自我关怀正念 Web App</small>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="页面导航">
+      <a href="#intro">引言</a>
+      <a href="#theory">理论</a>
+      <a href="#app">应用</a>
+      <a href="#privacy">隐私</a>
+      <a href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">打开应用</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero page-shell" aria-label="页面标题">
+      <div class="reveal">
+        <p class="article-meta">专业内容文章 · 自我关怀与日常心理照顾</p>
+        <h1>自我关怀不是脆弱，而是一种重新安顿自己的能力</h1>
+        <p class="hero-copy">当压力、疲惫和自我否定不断累积时，我们需要的不一定是立刻解决所有问题，而是先学会用更温和的方式对待自己。Heart Haven（心栖）正是基于这个想法而设计的一款轻量级自我关怀正念 Web App。</p>
+        <div class="button-row">
+          <a class="button primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">开始一次 3 分钟练习</a>
+          <a class="button secondary" href="#theory">了解自我关怀</a>
+        </div>
+        <p class="support-line">无需注册｜默认本地保存｜支持正念音频与关怀记录</p>
+      </div>
+      <aside class="hero-card reveal" aria-label="文章导读">
+        <h2>这篇文章会讲什么？</h2>
+        <ul class="note-list">
+          <li>自我关怀 Self-Compassion 的基本理论。</li>
+          <li>正念练习、情绪记录和善意记录为什么能帮助日常压力管理。</li>
+          <li>Heart Haven（心栖）如何把这些想法变成一个轻量的浏览器工具。</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="intro" class="article-shell" aria-label="引言区">
+      <article class="article-card reveal">
+        <h2>为什么很多人越努力，反而越疲惫？</h2>
+        <p>现代人的压力并不总是来自某一个巨大的事件。更多时候，它来自持续堆积的小事：没有完成的任务、不断弹出的消息、对未来的不确定、关系里的误会，以及对自己的反复责备。</p>
+        <p>很多人在疲惫时，第一反应不是休息，而是继续要求自己：</p>
+        <div class="quote-stack" aria-label="常见自我批评">
+          <div class="quote-card">“我是不是还不够努力？”</div>
+          <div class="quote-card">“为什么别人可以，我却不行？”</div>
+          <div class="quote-card">“这点事情都处理不好，是不是我的问题？”</div>
+        </div>
+        <p>但长期用批评和压迫的方式推动自己，往往不会让人真正变稳定。它可能让人更紧绷、更焦虑，也更难恢复。</p>
+        <p>自我关怀的意义就在这里：它不是让人逃避问题，而是帮助人在困难时，先用一种更温和、更清醒的方式与自己相处。</p>
+        <div class="card-actions">
+          <a class="button primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">先给自己 3 分钟</a>
+        </div>
+      </article>
+    </section>
+
+    <section id="theory" class="article-shell" aria-label="理论解释区">
+      <article class="article-card reveal">
+        <h2>自我关怀 Self-Compassion 是什么？</h2>
+        <p>自我关怀并不是“自我安慰一下就好”，也不是“对自己放纵”。在心理学中，自我关怀通常指人在痛苦、失败、压力或感到不足时，能够以理解、温和和清醒的态度对待自己。</p>
+        <p>它包含三个重要部分：</p>
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h3>1. Self-Kindness：对自己保持善意</h3>
+            <p>当事情没有做好时，不是立刻责备自己，而是承认：“我现在确实很难受。”“我可以先慢慢整理。”“我不需要用攻击自己的方式解决问题。”</p>
+            <p>这种态度不是逃避责任，而是避免让自我批评进一步消耗心理能量。</p>
+          </div>
+          <div class="concept-card">
+            <h3>2. Common Humanity：理解痛苦是人类共同经验</h3>
+            <p>人在低落时，很容易觉得“只有我这么糟糕”“只有我处理不好”。但自我关怀提醒我们：失败、焦虑、脆弱和不确定，并不是某个人独有的问题，而是人都会经历的一部分。</p>
+            <p>意识到这一点，可以减少孤立感。</p>
+          </div>
+          <div class="concept-card">
+            <h3>3. Mindfulness：用更平衡的方式看见当下</h3>
+            <p>正念不是强迫自己变平静，而是练习看见当下发生了什么：我现在很紧张。我正在自责。我的身体很累。我的情绪正在上升。</p>
+            <p>当我们能看见情绪，而不是完全被情绪带走时，就多了一点重新选择的空间。</p>
+          </div>
+        </div>
+        <div class="card-actions">
+          <a class="button primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">体验一次自我关怀正念</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="page-shell" aria-label="痛点共鸣区">
+      <div class="section-head reveal">
+        <h2>你可能在这些时刻，需要的不是继续硬撑</h2>
+      </div>
+      <div class="grid three">
+        <article class="scenario-card reveal">
+          <h3>任务太多，压力快满出来时</h3>
+          <b>内心语言</b>
+          <p>我不能停，我还有很多事没做。</p>
+          <b>自我关怀的替代方式</b>
+          <p>先停 3 分钟，不是放弃任务，而是让自己恢复一点处理任务的能力。</p>
+        </article>
+        <article class="scenario-card reveal">
+          <h3>因为一个小失误反复自责时</h3>
+          <b>内心语言</b>
+          <p>我怎么连这个都做不好？</p>
+          <b>自我关怀的替代方式</b>
+          <p>把“我很差”换成“我现在遇到了困难，我可以一步步处理”。</p>
+        </article>
+        <article class="scenario-card reveal">
+          <h3>关系里受到冷淡或误解时</h3>
+          <b>内心语言</b>
+          <p>是不是我不重要？是不是我做错了？</p>
+          <b>自我关怀的替代方式</b>
+          <p>先稳定情绪，再回看事实，而不是只让受伤感主导判断。</p>
+        </article>
+        <article class="scenario-card reveal">
+          <h3>低落时想不起曾被帮助过</h3>
+          <b>内心语言</b>
+          <p>好像没有人真的在乎我。</p>
+          <b>自我关怀的替代方式</b>
+          <p>把曾经收到的善意记录下来，让温暖的证据不被情绪淹没。</p>
+        </article>
+        <article class="scenario-card reveal">
+          <h3>想开始冥想，却被复杂课程劝退时</h3>
+          <b>内心语言</b>
+          <p>我是不是必须学会正确冥想才可以开始？</p>
+          <b>自我关怀的替代方式</b>
+          <p>从很短的一次练习开始，能开始就已经有意义。</p>
+        </article>
+      </div>
+      <div class="section-actions centered reveal">
+        <a class="button secondary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">找到适合我的练习方式</a>
+      </div>
+    </section>
+
+    <section class="article-shell" aria-label="知识深化区">
+      <article class="article-card reveal">
+        <h2>自我关怀的作用，不只是“让自己好受一点”</h2>
+        <p>自我关怀真正重要的地方，不只是让人短暂舒服，而是帮助人改变面对压力和情绪的方式。</p>
+        <ol class="mechanism-list">
+          <li><strong>减少过度自我批评：</strong>很多痛苦会被“我不够好”“都是我的问题”放大。自我关怀可以帮助人从攻击自己，转向理解自己正在面对什么。</li>
+          <li><strong>帮助情绪调节：</strong>当情绪上来时，人很容易陷入回避、压抑、反复想、越想越乱。自我关怀和正念练习可以帮助人先觉察情绪，再慢慢调整与情绪的距离。</li>
+          <li><strong>降低孤立感：</strong>痛苦时，人常常会觉得自己是一个人。自我关怀中的“共同人性”提醒我们：脆弱和困难并不是个人失败，而是人类经验的一部分。</li>
+          <li><strong>建立更稳定的自我关系：</strong>长期练习自我关怀，并不是让人变得软弱，而是让人不再只能依靠自我责备来推动自己。这会让人更容易恢复，也更容易重新行动。</li>
+        </ol>
+        <div class="card-actions">
+          <a class="button primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">从一次短练习开始</a>
+        </div>
+      </article>
+    </section>
+
+    <section id="app" class="page-shell" aria-label="App 介绍区">
+      <div class="app-bridge">
+        <article class="article-card reveal">
+          <h2>Heart Haven（心栖）：一个放在浏览器里的自我关怀空间</h2>
+          <p>Heart Haven（心栖）是一款轻量级正念冥想 Web App。它不是复杂的心理工具，也不是专业治疗服务，而是为日常生活中的压力、疲惫、自责和情绪波动设计的个人陪伴型应用。</p>
+          <p>它的核心想法很简单：</p>
+          <div class="card-actions">
+            <a class="button primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">打开 Heart Haven</a>
+          </div>
+        </article>
+        <aside class="hero-card reveal" aria-label="Heart Haven 的核心想法">
+          <div class="mini-flow">
+            <span>很累时，先开始一段短时间正念练习。</span>
+            <span>陷入自我怀疑时，回看真实存在过的善意。</span>
+            <span>想持续照顾自己时，用记录看见自己的变化。</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="page-shell" aria-label="核心功能区">
+      <div class="section-head reveal">
+        <h2>它不是让你“变完美”，而是帮你更容易开始</h2>
+      </div>
+      <div class="grid three">
+        <article class="feature-card reveal">
+          <h3>自我关怀正念冥想</h3>
+          <p>用户可以选择适合当下的音频，跟随播放、倒计时、呼吸提示和当下引导，完成一次轻量练习。</p>
+          <b>适合场景</b>
+          <p>压力过大、睡前放松、情绪波动后、需要重新集中注意力时。</p>
+          <div class="card-actions"><a class="button small primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">开始冥想</a></div>
+        </article>
+        <article class="feature-card reveal">
+          <h3>自然白噪音与舒缓声音</h3>
+          <p>除了自我关怀正念音频，Heart Haven 也支持自然环境音等内容，让用户根据当下状态选择更轻的陪伴方式。</p>
+          <b>适合场景</b>
+          <p>不想听语言引导，只想安静待一会儿时。</p>
+          <div class="card-actions"><a class="button small secondary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">选择声音</a></div>
+        </article>
+        <article class="feature-card reveal">
+          <h3>练习记录</h3>
+          <p>完成符合条件的练习后，系统会保存练习类型、音频名称、时长和完成时间。</p>
+          <b>适合场景</b>
+          <p>想知道自己是否真的在持续照顾自己时。</p>
+          <div class="card-actions"><a class="button small ghost" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">查看记录</a></div>
+        </article>
+        <article class="feature-card reveal">
+          <h3>统计与打卡日历</h3>
+          <p>统计页面可以查看累计时长、练习次数、冥想天数、平均时长和连续打卡情况。</p>
+          <b>适合场景</b>
+          <p>想看见长期变化，但不想给自己太大压力时。</p>
+          <div class="card-actions"><a class="button small primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">查看统计</a></div>
+        </article>
+        <article class="feature-card reveal">
+          <h3>关怀记录</h3>
+          <p>用户可以添加重要的人，并记录他们带来的善意片段，例如一句话、一个动作、一次帮助。</p>
+          <b>适合场景</b>
+          <p>在人际关系中感到不安、自我怀疑，或想保存关系里的温暖瞬间时。</p>
+          <div class="card-actions"><a class="button small secondary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">记录一个人</a></div>
+        </article>
+        <article class="feature-card reveal">
+          <h3>本地保存</h3>
+          <p>冥想记录、关怀对象、关怀内容和常用音频选择，默认保存在当前浏览器本地。</p>
+          <b>适合场景</b>
+          <p>不想把私人情绪和关系记录上传云端时。</p>
+          <div class="card-actions"><a class="button small ghost" href="#privacy">了解隐私方式</a></div>
+        </article>
+        <article class="feature-card reveal">
+          <h3>PWA 轻量使用</h3>
+          <p>Heart Haven 支持作为 PWA 使用，可以像 App 一样独立窗口打开，并支持基础离线缓存。</p>
+          <b>适合场景</b>
+          <p>希望快速打开、不想安装复杂应用时。</p>
+          <div class="card-actions"><a class="button small primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">打开应用</a></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="page-shell" aria-label="关怀记录重点区">
+      <article class="care-panel reveal">
+        <h2>为什么 Heart Haven 要加入「关怀记录」？</h2>
+        <p>自我关怀不只发生在一个人独处的时候，也和我们如何理解关系有关。</p>
+        <p>人在低落或焦虑时，常常会自动放大关系中的负面信息：对方没有及时回复。某句话听起来有点冷淡。一次误会让自己反复不安。</p>
+        <p>但关系并不只由这些片段组成。很多善意也曾经真实发生过，只是它们太小、太日常，容易被遗忘。</p>
+        <p>Heart Haven 的「关怀记录」功能，就是为了保存这些微小但重要的证据：</p>
+        <ul class="care-list">
+          <li>谁曾经支持过你</li>
+          <li>对方做过什么让你感到被照顾</li>
+          <li>哪些瞬间曾经让你觉得自己并不孤单</li>
+          <li>哪些关系值得被更平衡地看见</li>
+        </ul>
+        <p>这不是为了让你依赖别人，而是为了帮助你在情绪低谷时，不只看见受伤，也能看见被关怀过的事实。</p>
+        <div class="card-actions">
+          <a class="button secondary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">记录一条善意</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="page-shell" aria-label="适合人群区">
+      <div class="section-head reveal">
+        <h2>哪些人适合使用 Heart Haven？</h2>
+      </div>
+      <div class="grid three">
+        <article class="persona-card reveal">
+          <h3>事业或学业压力大的人</h3>
+          <b>常见痛点</b><p>每天被任务、期限和评价推着走，很难真正停下来。</p>
+          <b>如何帮助</b><p>用短时间音频练习和呼吸提示，让身体和注意力先慢一点。</p>
+          <div class="card-actions"><a class="button small primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">给自己 3 分钟</a></div>
+        </article>
+        <article class="persona-card reveal">
+          <h3>完美主义严重、经常自责的人</h3>
+          <b>常见痛点</b><p>一点小失误就会反复责备自己，越想变好越紧绷。</p>
+          <b>如何帮助</b><p>通过自我关怀练习，把“攻击自己”转为“理解自己”。</p>
+          <div class="card-actions"><a class="button small secondary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">开始自我关怀</a></div>
+        </article>
+        <article class="persona-card reveal">
+          <h3>敏感、易紧张的人</h3>
+          <b>常见痛点</b><p>容易被评价、冲突、变化影响，情绪和身体都很难放松。</p>
+          <b>如何帮助</b><p>通过稳定的声音、倒计时和呼吸节奏，建立一个低刺激的安静入口。</p>
+          <div class="card-actions"><a class="button small primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">进入安静模式</a></div>
+        </article>
+        <article class="persona-card reveal">
+          <h3>容易在人际关系中不安的人</h3>
+          <b>常见痛点</b><p>关系里的小变化容易引发反复猜测和自我怀疑。</p>
+          <b>如何帮助</b><p>通过关怀记录，保存关系中真实发生过的善意，让回看更平衡。</p>
+          <div class="card-actions"><a class="button small secondary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">记录重要的人</a></div>
+        </article>
+        <article class="persona-card reveal">
+          <h3>想开始冥想但怕复杂的人</h3>
+          <b>常见痛点</b><p>不想学习复杂课程，也不想被任务、会员和体系压迫。</p>
+          <b>如何帮助</b><p>打开、选择音频、开始练习，用最短路径进入状态。</p>
+          <div class="card-actions"><a class="button small primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">从简单开始</a></div>
+        </article>
+        <article class="persona-card reveal">
+          <h3>重视隐私的人</h3>
+          <b>常见痛点</b><p>不希望情绪、关系、私人记录默认上传到云端。</p>
+          <b>如何帮助</b><p>默认本地保存，让私人记录先留在自己的设备里。</p>
+          <div class="card-actions"><a class="button small ghost" href="#privacy">查看本地保存说明</a></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="article-shell" aria-label="使用方式区">
+      <article class="article-card reveal">
+        <h2>如何开始使用 Heart Haven？</h2>
+        <p>使用 Heart Haven 不需要复杂准备。</p>
+        <div class="usage-steps">
+          <div class="usage-step">打开应用，点击“开始冥想”。</div>
+          <div class="usage-step">选择一段适合当下的音频。</div>
+          <div class="usage-step">跟随音频、倒计时和呼吸提示完成练习。</div>
+          <div class="usage-step">完成后查看练习记录和统计。</div>
+          <div class="usage-step">进入「关怀」页面，记录重要的人和善意片段。</div>
+        </div>
+        <div class="card-actions">
+          <a class="button primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">现在打开 Heart Haven</a>
+        </div>
+      </article>
+    </section>
+
+    <section id="privacy" class="page-shell" aria-label="技术与隐私说明区">
+      <div class="section-head reveal">
+        <h2>轻量、私密、适合日常使用</h2>
+      </div>
+      <div class="grid two">
+        <article class="info-card reveal">
+          <h3>技术栈</h3>
+          <p>Heart Haven 当前基于 React、TypeScript、Vite 和 Tailwind CSS 构建，适合作为纯前端静态应用部署。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>本地数据</h3>
+          <p>冥想记录、关怀对象、关怀内容和常用音频选择，默认通过浏览器 localStorage 保存在当前设备。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>PWA 能力</h3>
+          <p>应用支持 Web App Manifest 和 Service Worker，可缓存基础资源，并提供接近 App 的打开体验。</p>
+        </article>
+        <article class="info-card reveal">
+          <h3>当前版本边界</h3>
+          <p>当前版本不包含用户账号、云端同步、后台管理、支付会员、医疗评估、心理量表或专业咨询服务。</p>
+        </article>
+      </div>
+      <div class="section-actions centered reveal">
+        <a class="button ghost" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">了解当前版本</a>
+      </div>
+    </section>
+
+    <section class="article-shell" aria-label="常见问题">
+      <div class="section-head reveal">
+        <h2>常见问题</h2>
+      </div>
+      <div class="faq-grid">
+        <details class="faq-card reveal"><summary>Heart Haven 是冥想 App 吗？</summary><p>它是一款以自我关怀正念练习为核心的轻量 Web App，同时加入了关怀记录、练习统计和本地保存能力。</p></details>
+        <details class="faq-card reveal"><summary>我没有冥想经验，可以使用吗？</summary><p>可以。Heart Haven 的路径很简单：选择音频，开始练习，跟随提示完成。不需要先掌握复杂理论。</p></details>
+        <details class="faq-card reveal"><summary>我的记录会上传吗？</summary><p>当前版本默认不会上传个人记录。冥想记录、关怀对象、关怀内容和常用音频选择默认保存在当前浏览器本地。</p></details>
+        <details class="faq-card reveal"><summary>换设备后记录还在吗？</summary><p>当前版本不支持多端同步。更换设备、浏览器，或清除浏览器数据后，本地记录不会自动迁移。</p></details>
+        <details class="faq-card reveal"><summary>关怀记录是做什么的？</summary><p>它用于记录重要的人和他们带来的善意片段。比如一句鼓励、一次陪伴、一个帮助。它可以帮助用户在低落时回看关系里的温暖事实。</p></details>
+        <details class="faq-card reveal"><summary>Heart Haven 可以替代心理咨询吗？</summary><p>不可以。它是日常正念练习和自我关怀记录工具，不提供诊断、治疗、心理评估或危机干预。</p></details>
+        <details class="faq-card reveal"><summary>我需要每天打卡吗？</summary><p>不需要强迫自己。Heart Haven 更强调低压力使用。你可以在压力大、睡前、情绪波动或想整理关系感受时打开它。</p></details>
+      </div>
+      <div class="section-actions centered reveal">
+        <a class="button primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">先体验一次</a>
+      </div>
+    </section>
+
+    <section class="page-shell" aria-label="非医疗说明区">
+      <article class="medical-panel reveal">
+        <h2>它是日常陪伴，不是专业治疗</h2>
+        <p>Heart Haven（心栖）是一款个人正念练习与自我关怀记录工具。它不提供医疗诊断、心理治疗、心理量表评估、专业咨询或危机干预服务。</p>
+        <p>如果用户正在经历强烈痛苦、持续失眠、危险念头、伤害自己或他人的冲动，应及时联系当地专业机构、医疗服务、心理咨询资源或可信赖的人。</p>
+        <p>Heart Haven 能提供的是一个日常使用的入口：帮助用户短暂停下来、练习自我关怀、记录善意，并以更温和的方式重新整理自己。</p>
+        <div class="card-actions">
+          <a class="button primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">我已了解，继续使用</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="page-shell" aria-label="结尾区">
+      <article class="final-panel reveal">
+        <h2>先不用急着变好，先给自己一个可以停下来的地方</h2>
+        <p>自我关怀不是软弱，也不是逃避。它是一种在困难时仍然不放弃自己的能力。</p>
+        <p>你可以从一次很短的练习开始。也可以从记录一个曾经温柔对待你的人开始。</p>
+        <p>Heart Haven 不会替你解决全部问题。但它可以在你压力很大、情绪很乱、开始责备自己的时候，给你一个更温和的入口。</p>
+        <div class="button-row">
+          <a class="button primary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">开始 3 分钟练习</a>
+          <a class="button secondary" href="https://huzhenlin310-dotcom.github.io/Heart-Haven/#app">记录一条善意</a>
+        </div>
+        <p class="support-line">不用完美开始。能开始，就已经足够。</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer page-shell">
+    <div class="footer-line">
+      <span>Heart Haven（心栖）</span>
+      <span>自我关怀正念与关怀记录</span>
+    </div>
+  </footer>
+
+  <script>
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (!prefersReducedMotion && "IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+
+      document.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
+    } else {
+      document.querySelectorAll(".reveal").forEach((element) => element.classList.add("is-visible"));
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+      link.addEventListener("click", (event) => {
+        const targetId = link.getAttribute("href");
+        if (!targetId || targetId === "#") return;
+        const target = document.querySelector(targetId);
+        if (!target) return;
+        event.preventDefault();
+        target.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
+      });
+    });
+  </script>
+</body>
+</html>
